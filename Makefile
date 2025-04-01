@@ -1,6 +1,6 @@
 BUILD_DIR = ./build
 TEST_NAME ?= MMAU.MMAUTestExpect
-SV_NAME ?= PEcube_sv
+SV_NAME ?= Adder_sv
 PYTHON_NAME ?= MMAUtestGen.py
 
 init:
