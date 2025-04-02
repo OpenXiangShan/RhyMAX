@@ -4,8 +4,9 @@ SV_NAME ?= Adder_sv
 PYTHON_NAME ?= MMAUtestGen.py
 
 init:
-	git submodule update --init
-	cd rocket-chip && git submodule update --init hardfloat cde
+	# git submodule update --init
+	# cd rocket-chip && git submodule update --init hardfloat cde
+	git submodule update --init --recursive --jobs 4
 
 compile:
 	mill -i AME.compile
