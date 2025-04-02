@@ -1,6 +1,7 @@
 [submodule "Utility"]
 	path = Utility
 	url = git@github.com:OpenXiangShan/Utility.git
+	branch = master  # 明确指定跟踪主分支
 [submodule "rocket-chip"]
 	path = rocket-chip
 	url = git@github.com:OpenXiangShan/rocket-chip.git
