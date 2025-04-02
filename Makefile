@@ -1,11 +1,9 @@
 BUILD_DIR = ./build
 TEST_NAME ?= MMAU.MMAUTestExpect
-SV_NAME ?= Adder_sv
+SV_NAME ?= PEcube_sv
 PYTHON_NAME ?= MMAUtestGen.py
 
 init:
-	# git submodule update --init
-	# cd rocket-chip && git submodule update --init hardfloat cde
 	git submodule update --init --recursive --jobs 4
 
 compile:
