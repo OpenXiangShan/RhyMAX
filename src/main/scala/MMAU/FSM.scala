@@ -14,10 +14,10 @@ class FSM extends MMAUFormat{
 
     val muxCtrlC = Output(Vec(m , Vec(n/4 , Bool())))     
     val muxCtrlSum = Output(Vec(m , Vec(n/4 , Bool())))          
-    val addrReadA = Output(Vec(m , UInt(ADDR_LEN.W)))
-    val addrReadB = Output(Vec(n/4 , UInt(ADDR_LEN.W)))
-    val addrReadC = Output(Vec(n/4 , UInt(ADDR_LEN.W)))
-    val addrWriteC = Output(Vec(n/4 , UInt(ADDR_LEN.W)))
+    val addrReadA = Output(Vec(m , UInt(Tr_INDEX_LEN.W)))
+    val addrReadB = Output(Vec(n/4 , UInt(Tr_INDEX_LEN.W)))
+    val addrReadC = Output(Vec(n/4 , UInt(Acc_INDEX_LEN.W)))
+    val addrWriteC = Output(Vec(n/4 , UInt(Acc_INDEX_LEN.W)))
     val sigEnWriteC = Output(Vec(n/4 , Bool()))    //C写使能
     val sigDone = Output(Bool())    //结束信号
 
@@ -64,10 +64,10 @@ class FSM extends MMAUFormat{
 
   /*    read matrixA    */
   
-  val wireAddrReadA = Wire(UInt(ADDR_LEN.W))
+  val wireAddrReadA = Wire(UInt(Tr_INDEX_LEN.W))
   wireAddrReadA := regOffM * (tileK/k).U + regOffK
 
-  val regDelayA = Reg(Vec(m-1, UInt(ADDR_LEN.W)))  // 定义寄存器组
+  val regDelayA = Reg(Vec(m-1, UInt(Tr_INDEX_LEN.W)))  // 定义寄存器组
   regDelayA.foreach(_ := 0.U)  // 初始化所有寄存器为 0
   
   regDelayA(0) := wireAddrReadA
@@ -82,13 +82,13 @@ class FSM extends MMAUFormat{
 
   /*    read matrixB    */
   
-  val wireAddrReadB = Wire(UInt(ADDR_LEN.W))
+  val wireAddrReadB = Wire(UInt(Tr_INDEX_LEN.W))
   wireAddrReadB := regOffN * (tileK/k).U + regOffK
 
   io.addrReadB(0) := wireAddrReadB  
 
   if(n > 4){
-    val regDelayB = Reg(Vec(n/4 - 1, UInt(ADDR_LEN.W)))  // 定义寄存器组
+    val regDelayB = Reg(Vec(n/4 - 1, UInt(Tr_INDEX_LEN.W)))  // 定义寄存器组
     regDelayB.foreach(_ := 0.U)  // 初始化所有寄存器为 0
 
     regDelayB(0) := wireAddrReadB
@@ -104,13 +104,13 @@ class FSM extends MMAUFormat{
 
   /*    read & write matrixC    */
 
-  val wireAddrPublicC = Wire(UInt(ADDR_LEN.W))  //C读写地址是可以复用的,只是时间上有前后(目前认为没有先后,因为是瞬间出来)
+  val wireAddrPublicC = Wire(UInt(Acc_INDEX_LEN.W))  //C读写地址是可以复用的,只是时间上有前后(目前认为没有先后,因为是瞬间出来)
   // wireAddrPublicC := ( numN.U * regOffM + regOffN - 1.U) * m.U + regOffK  //只有kState(0) ~ kState(m-1) 的数据是有意义的
   val wireNumStep = Wire(UInt(log2Ceil(numM * numN).W))
   wireNumStep := numN.U * regOffM + regOffN - 1.U
   wireAddrPublicC := wireNumStep * m.U + regOffK  //只有kState(0) ~ kState(m-1) 的数据是有意义的
 
-  val regDelayC = Reg(Vec(n/4 , UInt(ADDR_LEN.W)))
+  val regDelayC = Reg(Vec(n/4 , UInt(Acc_INDEX_LEN.W)))
   regDelayC.foreach(_ := 0.U)
 
   regDelayC(0) := wireAddrPublicC
@@ -214,10 +214,10 @@ class FSM extends MMAUFormat{
 
 //     val muxCtrlC = Output(Vec(m, Bool()))    // m 个控制信号，同一行是共用的
 //     val muxCtrlSum = Output(Vec(m, Bool()))         // m 个,用于控制DPA内部累加寄存器更新逻辑（累加 or 归位）,同一行是共用的
-//     val addrReadA = Output(Vec(m,UInt(ADDR_LEN.W)))
-//     val addrReadB = Output(Vec(n,UInt(ADDR_LEN.W)))
-//     val addrReadC = Output(Vec(n,UInt(ADDR_LEN.W)))
-//     val addrWriteC = Output(Vec(n,UInt(ADDR_LEN.W)))
+//     val addrReadA = Output(Vec(m,UInt(Tr_INDEX_LEN.W)))
+//     val addrReadB = Output(Vec(n,UInt(Tr_INDEX_LEN.W)))
+//     val addrReadC = Output(Vec(n,UInt(Acc_INDEX_LEN.W)))
+//     val addrWriteC = Output(Vec(n,UInt(Acc_INDEX_LEN.W)))
 //     val writeEnC = Output(Vec(n, Bool()))
 //     val sigDone = Output(Bool())    //结束信号
 
@@ -262,11 +262,11 @@ class FSM extends MMAUFormat{
 // //   io.testOut := regTest3
 
 //   /*    read matrixA    */
-//   val wireAddrReadA = Wire(UInt(ADDR_LEN.W))
+//   val wireAddrReadA = Wire(UInt(Tr_INDEX_LEN.W))
 //   wireAddrReadA := regOffM * (tileK/k).U + regOffK
 
-// //   val regDelayA = VecInit(Seq.fill(m-1)(RegInit(0.U(ADDR_LEN.W))))   //这种实例化方式好像有问题,无法通过简单连接寄存器的方式实现"数据流动"的效果
-//   val regDelayA = Reg(Vec(m-1, UInt(ADDR_LEN.W)))  // 定义寄存器组
+// //   val regDelayA = VecInit(Seq.fill(m-1)(RegInit(0.U(Tr_INDEX_LEN.W))))   //这种实例化方式好像有问题,无法通过简单连接寄存器的方式实现"数据流动"的效果
+//   val regDelayA = Reg(Vec(m-1, UInt(Tr_INDEX_LEN.W)))  // 定义寄存器组
 //   regDelayA.foreach(_ := 0.U)  // 初始化所有寄存器为 0
   
 //   regDelayA(0) := wireAddrReadA
@@ -280,7 +280,7 @@ class FSM extends MMAUFormat{
 //   }
 
 //   /*    read matrixB    */
-//   val wireAddrReadB = Wire(UInt(ADDR_LEN.W))
+//   val wireAddrReadB = Wire(UInt(Tr_INDEX_LEN.W))
 //   wireAddrReadB := regOffN * (tileK/k).U + regOffK
   
 //   for(i <- 0 until n){

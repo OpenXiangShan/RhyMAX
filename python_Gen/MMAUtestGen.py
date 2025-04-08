@@ -6,11 +6,11 @@ class MatrixGenerator:
         # 参数初始化
         self.tileM = 16
         self.tileN = 16
-        self.tileK = 64
+        self.tileK = 32
         
         self.m = 4
-        self.n = 8
-        self.k = 16
+        self.n = 4
+        self.k = 8
         # self.tileM = 64
         # self.tileN = 64
         # self.tileK = 256
@@ -86,15 +86,15 @@ class MatrixGenerator:
 
     def save_to_file(self):
         """保存为完整的 Scala 文件"""
-        output_dir = "../src/main/scala/common"
+        output_dir = "../test/src/main/scala/MMAU"
         os.makedirs(output_dir, exist_ok=True)  # 创建目录（如果不存在）
-        output_file = os.path.join(output_dir, "TestData.scala")
+        output_file = os.path.join(output_dir, "MMAU_TestData.scala")
 
         with open(output_file, "w") as f:
             # 写入 Scala 文件头部
-            f.write("package common\n\n")
+            f.write("package MMAU\n\n")
             f.write("import chisel3._\n\n")
-            f.write("object TestData {\n")
+            f.write("object MMAUTestData {\n")
 
             # 写入 A 矩阵
             f.write("  val A = Seq(\n")

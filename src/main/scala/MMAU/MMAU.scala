@@ -13,10 +13,10 @@ class MMAU extends MMAUFormat {
     val vecCin = Input(Vec(n/4 , UInt((32 * 4).W)))
     
     val vecCout = Output(Vec(n/4 , UInt((32 * 4).W)))
-    val addrReadA = Output(Vec(m , UInt(ADDR_LEN.W)))
-    val addrReadB = Output(Vec(n , UInt(ADDR_LEN.W)))
-    val addrReadC = Output(Vec(n/4 , UInt(ADDR_LEN.W)))
-    val addrWriteC = Output(Vec(n/4 , UInt(ADDR_LEN.W)))
+    val addrReadA = Output(Vec(m , UInt(Tr_INDEX_LEN.W)))
+    val addrReadB = Output(Vec(n , UInt(Tr_INDEX_LEN.W)))
+    val addrReadC = Output(Vec(n/4 , UInt(Acc_INDEX_LEN.W)))
+    val addrWriteC = Output(Vec(n/4 , UInt(Acc_INDEX_LEN.W)))
     val sigEnWriteC = Output(Vec(n/4 , Bool()))    //C写使能
     val sigDone = Output(Bool())    //结束信号
   })
