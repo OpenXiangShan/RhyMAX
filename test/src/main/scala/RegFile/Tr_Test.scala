@@ -97,7 +97,7 @@ class TrTest extends AnyFreeSpec with Matchers {
         }
 
         // 停止读请求
-        dut.io.r(bankIdx).req.valid.poke(false.B)
+        // dut.io.r(bankIdx).req.valid.poke(false.B)
       }
 
     }

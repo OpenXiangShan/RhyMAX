@@ -23,6 +23,7 @@ class Tr extends RegFileFormat {
       setSplit = setSplitTr,
       waySplit = waySplitTr,
       dataSplit = dataSplitTr,
+      bypassWrite = true,
       suffix = Some("sram"),
     ))
   }

@@ -23,6 +23,7 @@ class Acc extends RegFileFormat {
       setSplit = setSplitAcc,
       waySplit = waySplitAcc,
       dataSplit = dataSplitAcc,
+      bypassWrite = true,
       suffix = Some("sram"),
     ))
   }

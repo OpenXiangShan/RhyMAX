@@ -8,9 +8,9 @@ class MatrixGenerator:
         self.tileN = 16
         self.tileK = 32
         
-        self.m = 4
-        self.n = 4
-        self.k = 8
+        self.m = 8
+        self.n = 8
+        self.k = 4
         # self.tileM = 64
         # self.tileN = 64
         # self.tileK = 256

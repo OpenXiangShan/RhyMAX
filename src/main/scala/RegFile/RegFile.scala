@@ -8,35 +8,6 @@ import utility.sram._
 
 
 
-class RegFileIO extends Bundle {
-  //Tr
-  val readTr = Vec(Consts.numTrReadPort, new Bundle {
-    val addr = Input(UInt(3.W)) // 选择具体的 Tr（0~3）
-    val r = Vec(Consts.numTrBank, Flipped(new SRAMReadBus(Consts.genTr, Consts.setTr, Consts.wayTr)))
-    val act = Input(Bool())
-  })
-
-  val writeTr = Vec(Consts.numTrWritePort, new Bundle {
-    val addr = Input(UInt(3.W)) // 选择具体的 Tr（0~3）
-    val w = Vec(Consts.numTrBank, Flipped(new SRAMWriteBus(Consts.genTr, Consts.setTr, Consts.wayTr, Consts.useBitmaskTr)))
-    val act = Input(Bool())
-  })
-
-  //Acc
-  val readAcc = Vec(Consts.numAccReadPort, new Bundle {
-    val addr = Input(UInt(3.W)) // 选择具体的 Acc（0~3）
-    val r = Vec(Consts.numAccBank, Flipped(new SRAMReadBus(Consts.genAcc, Consts.setAcc, Consts.wayAcc)))
-    val act = Input(Bool())
-  })
-
-  val writeAcc = Vec(Consts.numAccWritePort, new Bundle {
-    val addr = Input(UInt(3.W)) // 选择具体的 Acc（0~3）
-    val w = Vec(Consts.numAccBank, Flipped(new SRAMWriteBus(Consts.genAcc, Consts.setAcc, Consts.wayAcc, Consts.useBitmaskAcc)))
-    val act = Input(Bool())
-  })
-}
-
-
 
 
 class RegFile extends RegFileFormat {

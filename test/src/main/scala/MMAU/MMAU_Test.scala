@@ -12,98 +12,94 @@ import common._
 
 
 
-
 class MMAUTestExpect extends AnyFreeSpec with Matchers {
-
-
-  def checkOutput(dut: MMAU): Unit = {
-    // 装填 vecA
-    for (i <- 0 until Consts.m) {
-      val addrReadA = dut.io.addrReadA(i).peek().litValue.toInt  // 获取地址值
-      if(addrReadA < MMAUTestData.A.head.length && addrReadA >= 0){
-        dut.io.vecA(i).poke(MMAUTestData.A(i)(addrReadA))  // 根据地址装填数据
-      }
-      
-    }
-
-    // 装填 vecB
-    for (i <- 0 until Consts.n) {
-      val addrReadB = dut.io.addrReadB(i).peek().litValue.toInt  // 获取地址值
-      if(addrReadB < MMAUTestData.B.head.length && addrReadB >= 0){
-        dut.io.vecB(i).poke(MMAUTestData.B(i)(addrReadB))  // 根据地址装填数据
-      }
-      
-    }
-
-    // 推进时钟
-    dut.clock.step(1)
-
-    // 装填 vecCin
-    for (i <- 0 until Consts.n / 4) {
-      val addrReadC = dut.io.addrReadC(i).peek().litValue.toInt  // 获取地址值
-      if(addrReadC < MMAUTestData.Ctmp.head.length && addrReadC >= 0){
-        dut.io.vecCin(i).poke(MMAUTestData.Ctmp(i)(addrReadC))  // 根据地址装填数据
-        // dut.io.vecCin(i).poke(0.U)
-      }
-      
-    }
-
-    // 检查 vecCout
-    for (i <- 0 until Consts.n / 4) {
-      val addrWriteC = dut.io.addrWriteC(i).peek().litValue.toInt  // 获取地址值
-      if (dut.io.sigEnWriteC(i).peek().litToBoolean) {  // 检查写使能信号
-        dut.io.vecCout(i).expect(MMAUTestData.C(i)(addrWriteC))  // 验证输出
-        // val vecCout = dut.io.vecCout(i).peek().litValue.toString(16)
-        // println(s"i = $i , addrWriteC = $addrWriteC , sigEnWriteC = ${dut.io.sigEnWriteC(i).peek().litToBoolean} vecCout = $vecCout")
-      }
-    }
-  }
 
   "MMAU should PASS" in {
     simulate(new MMAU) { dut =>
 
-      val numM = Consts.tileM / Consts.m
-      val numN = Consts.tileN / Consts.n
-      val numK = Consts.tileK / Consts.k
 
-      for (i <- 0 until 5) { // 预跑几个cycle
+      for (i <- 0 until 5) { // 先随便跑几个cycle
         dut.clock.step(1)
       }
 
-      dut.io.sigStart.poke(true.B)
+      dut.io.sigStart.poke(true.B)  //启动信号
       dut.clock.step(1)
       dut.io.sigStart.poke(false.B)
 
-      for (i <- 0 until numM) {
-        for (j <- 0 until numN) {
-          for (p <- 0 until numK) {
+      for (i <- 0 until Consts.numM) {
+        for (j <- 0 until Consts.numN) {
+          for (p <- 0 until Consts.numK) {
             // println(s"mState = $i , nState = $j , kState = $p")
-            checkOutput(dut)
+            apply.checkOutputLatency(dut)
             // println("\n")
           }
         }
       }
 
 
-      for (p <- 0 until numK) {
+      for (p <- 0 until Consts.numK) {
             // println(s"mState = $i , nState = $j , kState = $p")
-            checkOutput(dut)
+            apply.checkOutputLatency(dut)
             // println(s"sigDone = ${dut.io.sigDone.peek().litToBoolean}") // 打印sigDone
             // println("\n")
       }
 
-      for (p <- 0 until numK) {
+      for (p <- 0 until Consts.numK) {
             // println(s"mState = $i , nState = $j , kState = $p")
-            checkOutput(dut)
+            apply.checkOutputLatency(dut)
             // println(s"sigDone = ${dut.io.sigDone.peek().litToBoolean}") // 打印sigDone
             // println("\n")
       }
-      
-
       
     }
   }
 }
+
+
+
+
+// class MMAUTestExpect extends AnyFreeSpec with Matchers {
+
+//   "MMAU should PASS" in {
+//     simulate(new MMAU) { dut =>
+
+
+//       for (i <- 0 until 5) { // 先随便跑几个cycle
+//         dut.clock.step(1)
+//       }
+
+//       dut.io.sigStart.poke(true.B)  //启动信号
+//       dut.clock.step(1)
+//       dut.io.sigStart.poke(false.B)
+
+//       for (i <- 0 until Consts.numM) {
+//         for (j <- 0 until Consts.numN) {
+//           for (p <- 0 until Consts.numK) {
+//             // println(s"mState = $i , nState = $j , kState = $p")
+//             apply.checkOutput(dut)
+//             // println("\n")
+//           }
+//         }
+//       }
+
+
+//       for (p <- 0 until Consts.numK) {
+//             // println(s"mState = $i , nState = $j , kState = $p")
+//             apply.checkOutput(dut)
+//             // println(s"sigDone = ${dut.io.sigDone.peek().litToBoolean}") // 打印sigDone
+//             // println("\n")
+//       }
+
+//       for (p <- 0 until Consts.numK) {
+//             // println(s"mState = $i , nState = $j , kState = $p")
+//             apply.checkOutput(dut)
+//             // println(s"sigDone = ${dut.io.sigDone.peek().litToBoolean}") // 打印sigDone
+//             // println("\n")
+//       }
+      
+//     }
+//   }
+// }
 
 
 
