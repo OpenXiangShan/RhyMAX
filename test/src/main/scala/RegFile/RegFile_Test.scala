@@ -7,7 +7,9 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import scala.util.Random
 
+import utility.sram._
 import common._
+import RegFile._
 import MMAU._
 
 

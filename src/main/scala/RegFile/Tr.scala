@@ -8,6 +8,7 @@ import utility.sram._
 
 
 
+
 class Tr extends RegFileFormat {
   val io = IO(new Bundle {
     val r = Vec(numTrBank, Flipped(new SRAMReadBus(genTr, setTr, wayTr)))

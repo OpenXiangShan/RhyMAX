@@ -104,9 +104,6 @@ object apply{
     val addrWriteC = dut.io.addrWriteC(i).peek().litValue.toInt
     if (dut.io.sigEnWriteC(i).peek().litToBoolean) {
       val expectedValue = MMAUTestData.C(i)(addrWriteC)
-      // val actualValue = dut.io.vecCout(i).peek().litValue
-      // val width = dut.io.vecCout(i).getWidth
-      // println(s"vecCout($i): actual = 0x${toUnsignedHex(actualValue, width)}, expected = 0x${toUnsignedHex(expectedValue, width)}")
       dut.io.vecCout(i).expect(expectedValue)
     }
   }

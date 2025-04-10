@@ -12,28 +12,28 @@ import utility.sram._
 
 
 
-// Tr Read
+// Tr ReadPort
 class RegFileTrReadIO extends Bundle {
   val addr = Input(UInt(3.W)) // 选择具体的 Tr（0~3）
   val r = Vec(Consts.numTrBank, Flipped(new SRAMReadBus(Consts.genTr, Consts.setTr, Consts.wayTr)))
   val act = Input(Bool())
 }
 
-// Tr Write
+// Tr WritePort
 class RegFileTrWriteIO extends Bundle {
   val addr = Input(UInt(3.W)) // 选择具体的 Tr（0~3）
   val w = Vec(Consts.numTrBank, Flipped(new SRAMWriteBus(Consts.genTr, Consts.setTr, Consts.wayTr, Consts.useBitmaskTr)))
   val act = Input(Bool())
 }
 
-// Acc Read
+// Acc ReadPort
 class RegFileAccReadIO extends Bundle {
   val addr = Input(UInt(3.W)) // 选择具体的 Acc（0~3）
   val r = Vec(Consts.numAccBank, Flipped(new SRAMReadBus(Consts.genAcc, Consts.setAcc, Consts.wayAcc)))
   val act = Input(Bool())
 }
 
-// Acc Write
+// Acc WritePort
 class RegFileAccWriteIO extends Bundle {
   val addr = Input(UInt(3.W)) // 选择具体的 Acc（0~3）
   val w = Vec(Consts.numAccBank, Flipped(new SRAMWriteBus(Consts.genAcc, Consts.setAcc, Consts.wayAcc, Consts.useBitmaskAcc)))

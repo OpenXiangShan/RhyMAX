@@ -53,7 +53,7 @@ class RegFile extends RegFileFormat {
   val accsVec = VecInit(accs.map(_.io)) 
   accsVec.foreach(_ := DontCare) //避免报错
 
-  //Acc
+  //Acc 
   for (portIdx <- 0 until numAccReadPort) {
   val port = io.readAcc(portIdx)
   
@@ -87,26 +87,3 @@ class RegFile extends RegFileFormat {
 
 
 
-
-
-
-// class RegFile extends RegFileFormat {
-//   val io = IO(new Bundle {
-//     val r = Flipped(new SRAMReadBus(genTr, setTr, wayTr))
-//     val w = Flipped(new SRAMWriteBus(genTr, setTr, wayTr, useBitmaskTr))
-//   })
-
-//   // 实例化SRAM（直接使用继承的参数）
-//   private val Bank = Module(new SplittedSRAMTemplate(
-//     gen = genTr,
-//     set = setTr,
-//     way = wayTr,
-//     setSplit = setSplitTr,
-//     waySplit = waySplitTr,
-//     dataSplit = dataSplitTr
-//   ))
-
-//   // 连接接口
-//   io.r <> Bank.io.r
-//   io.w <> Bank.io.w
-// }

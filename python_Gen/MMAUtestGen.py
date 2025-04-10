@@ -4,12 +4,12 @@ import os
 class MatrixGenerator:
     def __init__(self):
         # 参数初始化
-        self.tileM = 16
-        self.tileN = 16
-        self.tileK = 32
+        self.tileM = 32
+        self.tileN = 32
+        self.tileK = 64
         
-        self.m = 8
-        self.n = 8
+        self.m = 16
+        self.n = 16
         self.k = 4
         # self.tileM = 64
         # self.tileN = 64

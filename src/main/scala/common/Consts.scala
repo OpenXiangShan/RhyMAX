@@ -14,12 +14,12 @@ object Consts {
   val WORD_LEN      = 64
 
 
-  val tileM         = 16
-  val tileN         = 16
-  val tileK         = 32
+  val tileM         = 32
+  val tileN         = 32
+  val tileK         = 64
 
-  val m             = 8   
-  val n             = 8  
+  val m             = 16   
+  val n             = 16  
   val k             = 4
   // val tileM         = 64
   // val tileN         = 64

@@ -32,7 +32,3 @@ class PEcube extends MMAUFormat {
   io.vecBout := regR
 
 }
-
-// object Main extends App {
-//   (new chisel3.stage.ChiselStage).emitVerilog(new PEcube)
-// }
