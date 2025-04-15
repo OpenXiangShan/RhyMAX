@@ -72,6 +72,23 @@ object Consts {
 
   val Acc_INDEX_LEN   = log2Ceil(setAcc)
 
+  //All
+  val All_LEN       = scala.math.max(Acc_LEN , Tr_LEN)
+
+  val genAll: Data = UInt(All_LEN.W)
+  val setAll: Int = scala.math.max(setAcc , setTr)
+  val wayAll: Int = 1
+  val dataSplitAll: Int = 4
+  val setSplitAll: Int = 1
+  val waySplitAll: Int = 1
+  val useBitmaskAll: Boolean = false
+
+  val numAllBank: Int = scala.math.max(numAccBank , numTrBank)
+  val numAllReadPort: Int = 1
+  val numAllWritePort: Int = 1
+
+  val All_INDEX_LEN   = log2Ceil(setAll)
+
 }
 
 class MMAUFormat extends Module{
@@ -125,4 +142,22 @@ class RegFileFormat extends Module{
   val numAccBank = Consts.numAccBank
   val numAccReadPort = Consts.numAccReadPort
   val numAccWritePort = Consts.numAccWritePort
+
+  //All
+  val All_LEN       = Consts.All_LEN
+
+  val genAll = Consts.genAll
+  val setAll = Consts.setAll
+  val wayAll = Consts.wayAll
+  val dataSplitAll = Consts.dataSplitAll
+  val setSplitAll = Consts.setSplitAll
+  val waySplitAll = Consts.waySplitAll
+  val useBitmaskAll = Consts.useBitmaskAll
+
+  val numAllBank = Consts.numAllBank
+  val numAllReadPort = Consts.numAllReadPort
+  val numAllWritePort = Consts.numAllWritePort
+
+  val All_INDEX_LEN   = Consts.All_INDEX_LEN
+
 }
