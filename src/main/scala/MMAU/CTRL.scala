@@ -6,16 +6,10 @@ import chisel3.util._
 import common._
 
 
-/*    FSM与MMAU解耦    */
+/*    FSM与MMAU解耦，CTRL不包含任何状态机，纯数据通路    */
 class CTRL extends MMAUFormat{
   val io = IO(new Bundle {
-    // val sigStart = Input(Bool())    //启动信号，由FSM传入
-    // val sigDone = Input(Bool())    //结束信号，由FSM传入
-    // val firstMuxCtrl = Input(UInt(m.W)) //muxCtrlC和muxCtrlSum第一个值
-    // val firstAddrReadA = Input(UInt(Tr_INDEX_LEN.W))  //AddrReadA第一个值
-    // val firstAddrReadB = Input(UInt(Tr_INDEX_LEN.W))  //AddrReadB第一个值
-    // val firstAddrPublicC = Input(UInt(Acc_INDEX_LEN.W)) //AddrC第一个读写公共地址
-    // val firstEnWriteC = Input(Bool()) //C第一个写使能
+
     val FSM_io = new FSM_IO
 
 
@@ -32,25 +26,25 @@ class CTRL extends MMAUFormat{
 
 
   /*    muxCtrlC muxCtrlSum    */
-  require(latency >= 1)
-  val regLatency = Reg(Vec(latency , UInt(m.W)))  //考虑访存延迟引入
+  require(sramLatency >= 1)
+  val regLatency = Reg(Vec(sramLatency , UInt(m.W)))  //考虑访存延迟引入
   regLatency.foreach(_ := 0.U)
   regLatency(0) := io.FSM_io.firstMuxCtrl
-  for (i <- 1 until latency) {
+  for (i <- 1 until sramLatency) {
     regLatency(i) := regLatency(i - 1)
   }
 
 
   for(i <- 0 until m){//这很巧妙，muxCtrl直接复用regOffK
-    io.muxCtrlC(i)(0) := regLatency(latency-1)(i)
-    io.muxCtrlSum(i)(0) := regLatency(latency-1)(i)
+    io.muxCtrlC(i)(0) := regLatency(sramLatency-1)(i)
+    io.muxCtrlSum(i)(0) := regLatency(sramLatency-1)(i)
   }
 
   if(n > 4){  //此时不止一列tile,需要寄存器打拍
     val regMuxCrtl = Reg(Vec(n/4 - 1 , UInt(m.W)))
     regMuxCrtl.foreach(_ := 0.U)
     for(i <- 1 until n/4 -1) { regMuxCrtl(i) := regMuxCrtl(i-1)}
-    regMuxCrtl(0) := regLatency(latency-1)
+    regMuxCrtl(0) := regLatency(sramLatency-1)
 
     for(i <- 0 until m){
       for(j <- 1 until n/4){
@@ -98,7 +92,7 @@ class CTRL extends MMAUFormat{
   /*    read & write matrixC    */
 
 
-  private val numRegDelayC = n/4 - 1 + latency
+  private val numRegDelayC = n/4 - 1 + sramLatency
   val regDelayC = Reg(Vec(numRegDelayC , UInt(Acc_INDEX_LEN.W)))
   regDelayC.foreach(_ := 0.U)
 
@@ -113,26 +107,26 @@ class CTRL extends MMAUFormat{
   } 
 
 
-  for(i <- 0 until n/4){    //比read慢latency拍
-    io.addrWriteC(i) := regDelayC(i-1+latency)
+  for(i <- 0 until n/4){    //比read慢sramLatency拍
+    io.addrWriteC(i) := regDelayC(i-1+sramLatency)
   } 
 
 
   //write C enable
 
-  val regDelayEnWriteCLatency =  Reg(Vec(latency , Bool()))
-  regDelayEnWriteCLatency(0) := Mux(io.FSM_io.sigStart === true.B , false.B , io.FSM_io.firstEnWriteC)
-  for(i <- 1 until latency){
-      regDelayEnWriteCLatency(i) := Mux(io.FSM_io.sigStart === true.B , false.B , regDelayEnWriteCLatency(i-1))
+  val regDelayEnWriteCLatency =  Reg(Vec(sramLatency , Bool()))
+  regDelayEnWriteCLatency(0) := io.FSM_io.firstEnWriteC
+  for(i <- 1 until sramLatency){
+      regDelayEnWriteCLatency(i) := regDelayEnWriteCLatency(i-1)
   }
 
-  io.sigEnWriteC(0) := regDelayEnWriteCLatency(latency - 1)
+  io.sigEnWriteC(0) := regDelayEnWriteCLatency(sramLatency - 1)
 
   if(n/4 > 1){
     val regDelayEnWriteC = Reg(Vec(n/4 - 1 , Bool()))
-    regDelayEnWriteC(0) := Mux(io.FSM_io.sigStart === true.B , false.B , regDelayEnWriteCLatency(latency - 1))
+    regDelayEnWriteC(0) := regDelayEnWriteCLatency(sramLatency - 1)
     for(i <- 1 until n/4 - 1){
-      regDelayEnWriteC(i) := Mux(io.FSM_io.sigStart === true.B , false.B , regDelayEnWriteC(i-1))
+      regDelayEnWriteC(i) := regDelayEnWriteC(i-1)
     }
 
     for(i <- 1 until n/4){
@@ -155,10 +149,7 @@ class CTRL extends MMAUFormat{
 
 
 
-
-
-
-
+// /*非解耦版本*/
 // class FSM extends MMAUFormat{
 //   val io = IO(new Bundle {
 //     val sigStart = Input(Bool())    //启动信号
@@ -189,25 +180,25 @@ class CTRL extends MMAUFormat{
 
 
 //   /*    muxCtrlC muxCtrlSum    */
-//   require(latency >= 1)
-//   val regLatency = Reg(Vec(latency , UInt(m.W)))  //考虑访存延迟引入
+//   require(sramLatency >= 1)
+//   val regLatency = Reg(Vec(sramLatency , UInt(m.W)))  //考虑访存延迟引入
 //   regLatency.foreach(_ := 0.U)
 //   regLatency(0) := regOffK_1H(m-1 , 0)
-//   for (i <- 1 until latency) {
+//   for (i <- 1 until sramLatency) {
 //     regLatency(i) := regLatency(i - 1)
 //   }
 
 
 //   for(i <- 0 until m){//这很巧妙，muxCtrl直接复用regOffK
-//     io.muxCtrlC(i)(0) := regLatency(latency-1)(i)
-//     io.muxCtrlSum(i)(0) := regLatency(latency-1)(i)
+//     io.muxCtrlC(i)(0) := regLatency(sramLatency-1)(i)
+//     io.muxCtrlSum(i)(0) := regLatency(sramLatency-1)(i)
 //   }
 
 //   if(n > 4){  //此时不止一列tile,需要寄存器打拍
 //     val regMuxCrtl = Reg(Vec(n/4 - 1 , UInt(m.W)))
 //     regMuxCrtl.foreach(_ := 0.U)
 //     for(i <- 1 until n/4 -1) { regMuxCrtl(i) := regMuxCrtl(i-1)}
-//     regMuxCrtl(0) := regLatency(latency-1)
+//     regMuxCrtl(0) := regLatency(sramLatency-1)
 
 //     for(i <- 0 until m){
 //       for(j <- 1 until n/4){
@@ -266,7 +257,7 @@ class CTRL extends MMAUFormat{
 //   wireNumStep := numN.U * regOffM + regOffN - 1.U
 //   wireAddrPublicC := wireNumStep * m.U + regOffK  //只有kState(0) ~ kState(m-1) 的数据是有意义的
 
-//   private val numRegDelayC = n/4 - 1 + latency
+//   private val numRegDelayC = n/4 - 1 + sramLatency
 //   val regDelayC = Reg(Vec(numRegDelayC , UInt(Acc_INDEX_LEN.W)))
 //   regDelayC.foreach(_ := 0.U)
 
@@ -281,8 +272,8 @@ class CTRL extends MMAUFormat{
 //   } 
 
 
-//   for(i <- 0 until n/4){    //比read慢latency拍
-//     io.addrWriteC(i) := regDelayC(i-1+latency)
+//   for(i <- 0 until n/4){    //比read慢sramLatency拍
+//     io.addrWriteC(i) := regDelayC(i-1+sramLatency)
 //   } 
 
 
@@ -304,26 +295,26 @@ class CTRL extends MMAUFormat{
 //   val regCntDone = RegInit(0.U(log2Ceil(n/4 + m).W)) //是属于sigDone相关寄存器，C的第一个bank的index0结束后（regCntDone开始计时）,还需等待n/4 + m 个周期,所有bank结束
 
 //   if(m < numK){
-//     wireEnWriteC := Mux(regCntZero === 1.U && regOffK >= 0.U && regOffK <= (m-1).U && regCntDone < m.U - latency.U, true.B , false.B)
+//     wireEnWriteC := Mux(regCntZero === 1.U && regOffK >= 0.U && regOffK <= (m-1).U && regCntDone < m.U - sramLatency.U, true.B , false.B)
 //   }else{
-//     wireEnWriteC := Mux(regCntZero === 1.U && regCntDone < m.U - latency.U , true.B , false.B)
+//     wireEnWriteC := Mux(regCntZero === 1.U && regCntDone < m.U - sramLatency.U , true.B , false.B)
 //   }
 
 //   // when (wireEnWriteC) { //for debug
 //   //   printf("wireEnWriteC is true now \n" )
 //   // }
 
-//   val regDelayEnWriteCLatency =  Reg(Vec(latency , Bool()))
+//   val regDelayEnWriteCLatency =  Reg(Vec(sramLatency , Bool()))
 //   regDelayEnWriteCLatency(0) := Mux(io.sigStart === true.B , false.B , wireEnWriteC)
-//   for(i <- 1 until latency){
+//   for(i <- 1 until sramLatency){
 //       regDelayEnWriteCLatency(i) := Mux(io.sigStart === true.B , false.B , regDelayEnWriteCLatency(i-1))
 //   }
 
-//   io.sigEnWriteC(0) := regDelayEnWriteCLatency(latency - 1)
+//   io.sigEnWriteC(0) := regDelayEnWriteCLatency(sramLatency - 1)
 
 //   if(n/4 > 1){
 //     val regDelayEnWriteC = Reg(Vec(n/4 - 1 , Bool()))
-//     regDelayEnWriteC(0) := Mux(io.sigStart === true.B , false.B , regDelayEnWriteCLatency(latency - 1))
+//     regDelayEnWriteC(0) := Mux(io.sigStart === true.B , false.B , regDelayEnWriteCLatency(sramLatency - 1))
 //     for(i <- 1 until n/4 - 1){
 //       regDelayEnWriteC(i) := Mux(io.sigStart === true.B , false.B , regDelayEnWriteC(i-1))
 //     }
@@ -385,7 +376,7 @@ class CTRL extends MMAUFormat{
 
 
 
-// //不考虑latency
+// //不考虑sramLatency
 // class FSM extends MMAUFormat{
 //   val io = IO(new Bundle {
 //     val sigStart = Input(Bool())    //启动信号

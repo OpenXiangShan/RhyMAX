@@ -13,18 +13,13 @@ class FSM extends MMAUFormat{
   val io = IO(new Bundle {
     val sigStart = Input(Bool())    //启动信号
 
-    // val firstMuxCtrl = Output(UInt(m.W)) //muxCtrlC和muxCtrlSum第一个值
-    // val firstAddrReadA = Output(UInt(Tr_INDEX_LEN.W))  //AddrReadA第一个值
-    // val firstAddrReadB = Output(UInt(Tr_INDEX_LEN.W))  //AddrReadB第一个值
-    // val firstAddrPublicC = Output(UInt(Acc_INDEX_LEN.W)) //AddrC第一个读写公共地址
-    // val firstEnWriteC = Output(Bool()) //C第一个写使能
-    // val sigStartDeliver= Output(Bool())  //启动信号,同步传递给MMAU
-    // val sigDone = Output(Bool())    //结束信号
-    val FSM_io = Flipped(new FSM_IO) 
+    val FSM_io = Flipped(new FSM_IO) //输入计算单元的信号，均为寄存器链首数据
+
+    val sigDone = Output(Bool())    //结束信号
 
   })
 
-  io.FSM_io.sigStart := io.sigStart     //启动信号,同步传递给MMAU
+  // io.FSM_io.sigStart := io.sigStart     //启动信号,同步传递给MMAU
 
 
   val regOffM = RegInit(0.U(log2Ceil(numM).W))   //log2,向上取整
@@ -77,9 +72,9 @@ class FSM extends MMAUFormat{
   val regCntDone = RegInit(0.U(log2Ceil(n/4 + m).W)) //是属于sigDone相关寄存器，C的第一个bank的index0结束后（regCntDone开始计时）,还需等待n/4 + m 个周期,所有bank结束
 
   if(m < numK){
-    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regOffK >= 0.U && regOffK <= (m-1).U && regCntDone < m.U - latency.U, true.B , false.B)
+    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regOffK >= 0.U && regOffK <= (m-1).U && regCntDone < m.U - sramLatency.U, true.B , false.B)
   }else{
-    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regCntDone < m.U - latency.U , true.B , false.B)
+    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regCntDone < m.U - sramLatency.U , true.B , false.B)
   }
 
 
@@ -103,7 +98,7 @@ class FSM extends MMAUFormat{
     regCntDone := 0.U
   }
 
-  io.FSM_io.sigDone := Mux(regCntDone === (n/4 + m - 1).U , true.B , false.B)
+  io.sigDone := Mux(regCntDone === (n/4 + m - 1).U , true.B , false.B)
 
 }
 

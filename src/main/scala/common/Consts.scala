@@ -34,7 +34,7 @@ object Consts {
   val numK          = tileK / k
 
   /*    RegFile   */
-  val latency: Int = 1 
+  val sramLatency: Int = 1 
   //Tr
   val Tr_LEN        = 8 * k//Tr单个元素位宽（向量）
 
@@ -109,7 +109,7 @@ class MMAUFormat extends Module{
   val numN          = Consts.numN
   val numK          = Consts.numK
 
-  val latency = Consts.latency
+  val sramLatency = Consts.sramLatency
 }
 
 class RegFileFormat extends Module{

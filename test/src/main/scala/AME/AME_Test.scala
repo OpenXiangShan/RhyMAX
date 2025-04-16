@@ -42,7 +42,25 @@ class AMETest extends AnyFreeSpec with Matchers {
         // println(s"run in AME")
       }
 
-      AME.apply.readTestDataFromAll(MMAUTestData.C, 4, dut)
+      AME.apply.readTestDataFromAll(MMAUTestData.C, 4, dut) //验证结果是否正确
+
+
+      /***********************************************************************************/
+
+      /*  跑第二条指令，看是否存在“脏数据”问题  */
+      println(s"run again")
+      
+      AME.apply.writeTestDataToAll(MMAUTestData.Ctmp, 4, dut)
+
+      AME.apply.AMEStart(dut)//启动AME
+
+      while(!dut.io.sigDone.peek().litToBoolean){
+        dut.clock.step(1)
+        // println(s"run in AME")
+      }
+
+      AME.apply.readTestDataFromAll(MMAUTestData.C, 4, dut) //验证结果是否正确
+
       
 
 
@@ -81,3 +99,6 @@ class AMETest extends AnyFreeSpec with Matchers {
 //     }
 //   }
 // }
+
+
+
