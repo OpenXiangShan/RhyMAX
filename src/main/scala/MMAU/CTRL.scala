@@ -6,7 +6,7 @@ import chisel3.util._
 import common._
 
 
-/*    FSM与MMAU解耦，CTRL不包含任何状态机，纯数据通路    */
+/*    FSM与MMAU解耦，CTRL不包含任何状态机，纯数据通路，考虑sramLatency    */
 class CTRL extends MMAUFormat{
   val io = IO(new Bundle {
 
@@ -149,7 +149,7 @@ class CTRL extends MMAUFormat{
 
 
 
-// /*非解耦版本*/
+// /*非解耦版本,考虑sramLatency*/
 // class FSM extends MMAUFormat{
 //   val io = IO(new Bundle {
 //     val sigStart = Input(Bool())    //启动信号

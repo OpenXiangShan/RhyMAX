@@ -14,8 +14,11 @@ import Expander._
 class AME extends Module {
   val io = IO(new Bundle {
     val sigStart = Input(Bool())    // 启动信号
+
+    val mtileConfig_io = new mtileConfig_IO
     val writeAll = new RegFileAllWriteIO  //通用读端口
     val readAll = new RegFileAllReadIO  //通用写端口
+
 
     val sigDone = Output(Bool())    // 结束信号
   })
@@ -23,15 +26,27 @@ class AME extends Module {
   val subMMAU = Module(new MMAU)
   val subRegFile = Module(new RegFile)
   val subFSM = Module(new FSM)
+  val subTileHandler = Module(new TileHandler)
 
-  subRegFile.io := DontCare
+
+  /*  between TileHandler and AME*/
+  subTileHandler.io.mtileConfig_io <> io.mtileConfig_io
+
+  /*  between TileHandler and FSM */
+  subTileHandler.io.TileHandler_io <> subFSM.io.TileHandler_io
+
+
+  
 
   /* between FSM and AME */
   subFSM.io.sigStart := io.sigStart
   io.sigDone := subFSM.io.sigDone
-  
+
+
 
   /* between RF and AME */
+  subRegFile.io := DontCare
+
   io.writeAll <> subRegFile.io.writeAll(0)
   io.readAll <> subRegFile.io.readAll(0)
 

@@ -18,9 +18,9 @@ object Consts {
   val tileN         = 32
   val tileK         = 64
 
-  val m             = 16   
-  val n             = 16  
-  val k             = 4
+  val m             = 8   
+  val n             = 8  
+  val k             = 2
   // val tileM         = 64
   // val tileN         = 64
   // val tileK         = 256

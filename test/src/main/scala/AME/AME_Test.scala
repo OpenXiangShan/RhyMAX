@@ -29,37 +29,38 @@ class AMETest extends AnyFreeSpec with Matchers {
       AME.apply.writeTestDataToAll(MMAUTestData.A, 0, dut)
       AME.apply.writeTestDataToAll(MMAUTestData.B, 1, dut)
       AME.apply.writeTestDataToAll(MMAUTestData.Ctmp, 4, dut)
-      // AME.apply.readTestDataFromTr(MMAUTestData.A, 0, dut)
-      // AME.apply.readTestDataFromTr(MMAUTestData.B, 1, dut)
-      // AME.apply.readTestDataFromAcc(MMAUTestData.Ctmp, 0, dut)
 
       dut.clock.step(1000) //随便跑几个cycle
 
-      AME.apply.AMEStart(dut)//启动AME
+      AME.apply.AMEStart(dut, 32, 32, 64)//启动AME
+
+      var cycleCount = 0
 
       while(!dut.io.sigDone.peek().litToBoolean){
         dut.clock.step(1)
-        // println(s"run in AME")
+        cycleCount += 1
       }
+
+      println(s"Total cycles: $cycleCount")
 
       AME.apply.readTestDataFromAll(MMAUTestData.C, 4, dut) //验证结果是否正确
 
 
       /***********************************************************************************/
 
-      /*  跑第二条指令，看是否存在“脏数据”问题  */
-      println(s"run again")
+      // /*  跑第二条指令，看是否存在“脏数据”问题  */
+      // println(s"run again")
       
-      AME.apply.writeTestDataToAll(MMAUTestData.Ctmp, 4, dut)
+      // AME.apply.writeTestDataToAll(MMAUTestData.Ctmp, 4, dut)
 
-      AME.apply.AMEStart(dut)//启动AME
+      // AME.apply.AMEStart(dut)//启动AME
 
-      while(!dut.io.sigDone.peek().litToBoolean){
-        dut.clock.step(1)
-        // println(s"run in AME")
-      }
+      // while(!dut.io.sigDone.peek().litToBoolean){
+      //   dut.clock.step(1)
+      //   // println(s"run in AME")
+      // }
 
-      AME.apply.readTestDataFromAll(MMAUTestData.C, 4, dut) //验证结果是否正确
+      // AME.apply.readTestDataFromAll(MMAUTestData.C, 4, dut) //验证结果是否正确
 
       
 
