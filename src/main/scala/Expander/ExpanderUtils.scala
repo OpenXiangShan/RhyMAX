@@ -7,19 +7,30 @@ import common._
 import MMAU._
 
 
-object applyTileHandler{
-  // 向上补齐到对齐数 align 的倍数
-  def ceilAlign(x: UInt, align: UInt): UInt = {
-    val a = align
-    ((x + a - 1.U) / a) * a
+// object applyTileHandler{
+//   // 向上补齐到对齐数 align 的倍数
+//   def ceilAlign(x: UInt, align: UInt): UInt = {
+//     val a = align
+//     ((x + a - 1.U) / a) * a
+//   }
+// }
+
+object applyTileHandler {
+  // 向上补齐到 2^log2align 的倍数（不使用除法）
+  def ceilAlignPow2(x: UInt, log2align: Int): UInt = {
+    val mask = ((1 << log2align) - 1).U(x.getWidth.W)
+    (x + mask) & (~mask)
   }
 }
 
 
+
+
+
 class TileHandler_IO extends Bundle{
-    val tilem = Output(UInt(log2Ceil(Consts.tileM+1).W))   //padding后m维度的长度，供计算单元使用
-    val tilen = Output(UInt(log2Ceil(Consts.tileN+1).W))   //padding后n维度的长度，供计算单元使用
-    val tilek = Output(UInt(log2Ceil(Consts.tileK+1).W))   //padding后k维度的长度，供计算单元使用
+    // val tilem = Output(UInt(log2Ceil(Consts.tileM+1).W))   //padding后m维度的长度，供计算单元使用
+    // val tilen = Output(UInt(log2Ceil(Consts.tileN+1).W))   //padding后n维度的长度，供计算单元使用
+    // val tilek = Output(UInt(log2Ceil(Consts.tileK+1).W))   //padding后k维度的长度，供计算单元使用
     val numm = Output(UInt(log2Ceil(Consts.numM+1).W))     
     val numn = Output(UInt(log2Ceil(Consts.numN+1).W))
     val numk = Output(UInt(log2Ceil(Consts.numK+1).W))

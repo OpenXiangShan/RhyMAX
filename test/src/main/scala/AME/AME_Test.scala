@@ -26,13 +26,13 @@ class AMETest extends AnyFreeSpec with Matchers {
     
       
       /*  提前手动写入A、B、C*/
-      AME.apply.writeTestDataToAll(MMAUTestData.A, 0, dut)
-      AME.apply.writeTestDataToAll(MMAUTestData.B, 1, dut)
-      AME.apply.writeTestDataToAll(MMAUTestData.Ctmp, 4, dut)
+      AME.apply.writeTestDataToAll(AMETestData.A, 0, dut)
+      AME.apply.writeTestDataToAll(AMETestData.B, 1, dut)
+      AME.apply.writeTestDataToAll(AMETestData.Ctmp, 4, dut)
 
       dut.clock.step(1000) //随便跑几个cycle
 
-      AME.apply.AMEStart(dut, 32, 32, 64)//启动AME
+      AME.apply.AMEStart(dut, 13, 12, 31)//启动AME
 
       var cycleCount = 0
 
@@ -41,9 +41,12 @@ class AMETest extends AnyFreeSpec with Matchers {
         cycleCount += 1
       }
 
-      println(s"Total cycles: $cycleCount")
+      
 
-      AME.apply.readTestDataFromAll(MMAUTestData.C, 4, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
+
+
+      println(s"Total cycles: $cycleCount")
 
 
       /***********************************************************************************/
@@ -51,7 +54,7 @@ class AMETest extends AnyFreeSpec with Matchers {
       // /*  跑第二条指令，看是否存在“脏数据”问题  */
       // println(s"run again")
       
-      // AME.apply.writeTestDataToAll(MMAUTestData.Ctmp, 4, dut)
+      // AME.apply.writeTestDataToAll(AMETestData.Ctmp, 4, dut)
 
       // AME.apply.AMEStart(dut)//启动AME
 
@@ -60,7 +63,7 @@ class AMETest extends AnyFreeSpec with Matchers {
       //   // println(s"run in AME")
       // }
 
-      // AME.apply.readTestDataFromAll(MMAUTestData.C, 4, dut) //验证结果是否正确
+      // AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
 
       
 
@@ -77,12 +80,12 @@ class AMETest extends AnyFreeSpec with Matchers {
     
       
 //       /*  提前手动写入A、B、C*/
-//       AME.apply.writeTestDataToTr(MMAUTestData.A, 0, dut)
-//       AME.apply.writeTestDataToTr(MMAUTestData.B, 1, dut)
-//       AME.apply.writeTestDataToAcc(MMAUTestData.Ctmp, 0, dut)
-//       // AME.apply.readTestDataFromTr(MMAUTestData.A, 0, dut)
-//       // AME.apply.readTestDataFromTr(MMAUTestData.B, 1, dut)
-//       // AME.apply.readTestDataFromAcc(MMAUTestData.Ctmp, 0, dut)
+//       AME.apply.writeTestDataToTr(AMETestData.A, 0, dut)
+//       AME.apply.writeTestDataToTr(AMETestData.B, 1, dut)
+//       AME.apply.writeTestDataToAcc(AMETestData.Ctmp, 0, dut)
+//       // AME.apply.readTestDataFromTr(AMETestData.A, 0, dut)
+//       // AME.apply.readTestDataFromTr(AMETestData.B, 1, dut)
+//       // AME.apply.readTestDataFromAcc(AMETestData.Ctmp, 0, dut)
 
 //       dut.clock.step(1000) //随便跑几个cycle
 
@@ -93,7 +96,7 @@ class AMETest extends AnyFreeSpec with Matchers {
 //         // println(s"run in AME")
 //       }
 
-//       AME.apply.readTestDataFromAcc(MMAUTestData.C, 0, dut)
+//       AME.apply.readTestDataFromAcc(AMETestData.C, 0, dut)
       
 
 

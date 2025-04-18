@@ -13,9 +13,9 @@ class MatrixGenerator:
         self.k = 2
 
         # 用户配置矩阵尺寸
-        self.mtilem = 24
-        self.mtilen = 28
-        self.mtilek = 48
+        self.mtilem = 13
+        self.mtilen = 12
+        self.mtilek = 31
 
         self.numM = self.tileM // self.m
         self.numN = self.tileN // self.n
@@ -90,14 +90,14 @@ class MatrixGenerator:
 
     def save_to_file(self):
         """保存为完整的 Scala 文件"""
-        output_dir = "../test/src/main/scala/MMAU"
+        output_dir = "../test/src/main/scala/AME"
         os.makedirs(output_dir, exist_ok=True)
-        output_file = os.path.join(output_dir, "MMAU_TestData.scala")
+        output_file = os.path.join(output_dir, "AME_TestData.scala")
 
         with open(output_file, "w") as f:
-            f.write("package MMAU\n\n")
+            f.write("package AME\n\n")
             f.write("import chisel3._\n\n")
-            f.write("object MMAUTestData {\n")
+            f.write("object AMETestData {\n")
 
             f.write("  val A = Seq(\n")
             for row in self.A:

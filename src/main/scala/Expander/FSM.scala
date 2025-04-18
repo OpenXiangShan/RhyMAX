@@ -11,7 +11,7 @@ import MMAU._
 
 
 
-
+//MMAU latency = numm * numn * numk + 2*sramlatency + m + n/4 -2
 class FSM extends MMAUFormat{
   val io = IO(new Bundle {
     val sigStart = Input(Bool())    //启动信号
@@ -93,7 +93,7 @@ class FSM extends MMAUFormat{
   val regCntDone = RegInit(0.U(log2Ceil(n/4 + m).W)) //是属于sigDone相关寄存器，C的第一个bank的index0结束后（regCntDone开始计时）,还需等待n/4 + m 个周期,所有bank结束
 
   when(m.U < io.TileHandler_io.numk){
-    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regOffK >= 0.U && regOffK <= (m-1).U && regCntDone < m.U - sramLatency.U, true.B , false.B)
+    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regOffK >= 0.U && regOffK <= (m-1).U && regCntDone < m.U - sramLatency.U , true.B , false.B)
   }.otherwise{
     io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regCntDone < m.U - sramLatency.U , true.B , false.B)
   }
@@ -102,12 +102,7 @@ class FSM extends MMAUFormat{
   /*    signal done    */
   
   val wireDone = Wire(Bool()) //C的第一个bank的index0结束
-
-  when(m.U < io.TileHandler_io.numk){
-    wireDone := Mux(regOffM === 0.U && regOffN === 0.U && regOffK === 1.U && regCntZero === 1.U , true.B , false.B)
-  }.otherwise{
-    wireDone := Mux(regOffM === 0.U && regOffN === 0.U && regOffK === 1.U && regCntZero === 1.U , true.B , false.B)
-  }
+  wireDone := Mux(regOffM === 0.U && regOffN === 0.U && regOffK === 1.U && regCntZero === 1.U , true.B , false.B)
 
   when(io.sigStart === true.B){
     regCntDone := 0.U

@@ -153,7 +153,7 @@ object apply {
         val status = if (readValue.litValue == data.litValue) "PASS" else "FAILED"
         println(s"Bank $bankIdx, Set $setIdx - Read value: ${readValue.litValue}, Expected: ${data.litValue} [$status]")
 
-        // dut.io.readAll.r(bankIdx).resp.data.head.asUInt.expect(data)
+        dut.io.readAll.r(bankIdx).resp.data.head.asUInt.expect(data)
 
         dut.io.readAll.r(bankIdx).req.valid.poke(false.B)
       }
