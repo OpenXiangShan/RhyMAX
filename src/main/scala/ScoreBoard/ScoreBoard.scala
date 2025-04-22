@@ -21,7 +21,8 @@ class ScoreBoard extends Module{
   io.ScoreboardVisit_io.read_Unit := regSB_Unit
 
   //write
-  regSB_RF := (regSB_RF | io.ScoreboardVisit_io.writeMaskAlloc_RF) & ~io.ScoreboardVisit_io.writeMaskFree_RF      //先分配后释放，不要在同一个cycle对同一个资源“既分配又释放”
+  // regSB_RF := (regSB_RF | io.ScoreboardVisit_io.writeMaskAlloc_RF) & ~io.ScoreboardVisit_io.writeMaskFree_RF      //先分配后释放，不要在同一个cycle对同一个资源“既分配又释放”
+  regSB_RF := (regSB_RF  & ~io.ScoreboardVisit_io.writeMaskFree_RF) | io.ScoreboardVisit_io.writeMaskAlloc_RF //必须先释放后分配!!
   regSB_Unit := (regSB_Unit | io.ScoreboardVisit_io.writeMaskAlloc_Unit) & ~io.ScoreboardVisit_io.writeMaskFree_Unit
 
 
