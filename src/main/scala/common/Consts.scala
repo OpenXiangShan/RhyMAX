@@ -52,6 +52,7 @@ object Consts {
   val numTrWritePort: Int = 3
 
   val Tr_INDEX_LEN    = log2Ceil(setTr) //Tr寻址时index需要的位宽
+  val Tr_ADDR_LEN     = log2Ceil(numTr) //表示Tr标号所需位宽（0～3）
   
 
   //Acc
@@ -71,6 +72,7 @@ object Consts {
   val numAccWritePort: Int = 3
 
   val Acc_INDEX_LEN   = log2Ceil(setAcc)
+  val Acc_ADDR_LEN     = log2Ceil(numAcc) //表示Acc标号所需位宽（0～3）
 
   //All
   val All_LEN       = scala.math.max(Acc_LEN , Tr_LEN)
@@ -88,6 +90,7 @@ object Consts {
   val numAllWritePort: Int = 1
 
   val All_INDEX_LEN   = log2Ceil(setAll)
+  val All_ADDR_LEN     = log2Ceil(numAcc + numTr) //表示所有寄存器标号所需位宽（0～7）
 
 }
 

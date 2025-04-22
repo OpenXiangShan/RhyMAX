@@ -1,7 +1,7 @@
 BUILD_DIR = ./build
 TEST_NAME ?= MMAU.MMAUTestExpect
 SV_NAME ?= PEcube_sv
-PYTHON_NAME ?= MMAUtestGen.py
+PYTHON_NAME ?= AMEtestGen.py
 
 init:
 	git submodule update --init --recursive --jobs 4

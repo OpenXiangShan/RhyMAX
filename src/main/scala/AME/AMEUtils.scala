@@ -15,11 +15,12 @@ object connectPort{ //用于将MMAU的有关信号连接到RegFile的读写端�
   def toTrReadPort(
     regFilePort: RegFileTrReadIO,
     addr: UInt,
+    actPort: Bool,
     mmauAddr: Vec[UInt],
     mmauData: Vec[UInt]
   ): Unit = {
     regFilePort.addr := addr
-    regFilePort.act := true.B
+    regFilePort.act := actPort
     for (i <- 0 until mmauAddr.length) {
       regFilePort.r(i).req.bits.setIdx := mmauAddr(i)
       regFilePort.r(i).req.valid := true.B
@@ -30,11 +31,12 @@ object connectPort{ //用于将MMAU的有关信号连接到RegFile的读写端�
   def toAccReadPort(
     regFilePort: RegFileAccReadIO,
     addr: UInt,
+    actPort: Bool,
     mmauAddr: Vec[UInt],
     mmauData: Vec[UInt]
   ): Unit = {
     regFilePort.addr := addr
-    regFilePort.act := true.B
+    regFilePort.act := actPort
     for (i <- 0 until mmauAddr.length) {
       regFilePort.r(i).req.bits.setIdx := mmauAddr(i)
       regFilePort.r(i).req.valid := true.B
@@ -46,12 +48,13 @@ object connectPort{ //用于将MMAU的有关信号连接到RegFile的读写端�
   def toAccWritePort(
     regFilePort: RegFileAccWriteIO,
     addr: UInt,
+    actPort: Bool,
     mmauAddr: Vec[UInt],
     mmauData: Vec[UInt],
     enable: Vec[Bool]
   ): Unit = {
     regFilePort.addr := addr
-    regFilePort.act := true.B
+    regFilePort.act := actPort
     for (i <- 0 until mmauAddr.length) {
       regFilePort.w(i).req.bits.setIdx := mmauAddr(i)
       regFilePort.w(i).req.valid := enable(i)

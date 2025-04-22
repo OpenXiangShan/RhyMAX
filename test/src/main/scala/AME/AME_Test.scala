@@ -18,7 +18,7 @@ import MMAU._
 
 
 
-
+//完整Expander版本
 class AMETest extends AnyFreeSpec with Matchers {
 
   "AME should PASS" in {
@@ -29,43 +29,116 @@ class AMETest extends AnyFreeSpec with Matchers {
       AME.apply.writeTestDataToAll(AMETestData.A, 0, dut)
       AME.apply.writeTestDataToAll(AMETestData.B, 1, dut)
       AME.apply.writeTestDataToAll(AMETestData.Ctmp, 4, dut)
+      AME.apply.writeTestDataToAll(AMETestData.Ctmp, 5, dut)
+      AME.apply.writeTestDataToAll(AMETestData.Ctmp, 6, dut)
+      AME.apply.writeTestDataToAll(AMETestData.Ctmp, 7, dut)
 
       dut.clock.step(1000) //随便跑几个cycle
 
-      AME.apply.AMEStart(dut, 13, 12, 31)//启动AME
 
-      var cycleCount = 0
 
-      while(!dut.io.sigDone.peek().litToBoolean){
+      // ins1
+      var cycleCountMMAU = 0
+      var cycleCountReady = 0
+
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 4, true.B, true.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+
+      while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
         dut.clock.step(1)
-        cycleCount += 1
+        cycleCountReady += 1
       }
 
+      dut.clock.step(1) //ready后需要主动前进一个时钟周期
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        dut.clock.step(1)
+        cycleCountMMAU += 1
+      }
+
+
+      println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
+
+
+      // ins2
+
+      cycleCountReady = 0
+      cycleCountMMAU = 0  //计数清零
+
+
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //下一条指令，换一个C
+
+      while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
+        dut.clock.step(1)
+        cycleCountReady += 1
+      }
+
+      dut.clock.step(1) //ready后需要主动前进一个时钟周期
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        dut.clock.step(1)
+        cycleCountMMAU += 1
+      }
+
+      println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
+
+
+      // ins3
+
+      cycleCountReady = 0
+      cycleCountMMAU = 0  //计数清零
+
+
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, true.B, true.B)  //下一条指令，换一个C
+
+      while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
+        dut.clock.step(1)
+        cycleCountReady += 1
+      }
+
+      dut.clock.step(1) //ready后需要主动前进一个时钟周期
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        dut.clock.step(1)
+        cycleCountMMAU += 1
+      }
+
+      println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
+
+
+
+      // ins4
+
+      cycleCountReady = 0
+      cycleCountMMAU = 0  //计数清零
+
+
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 7, true.B, true.B)  //下一条指令，换一个C
+
+      while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
+        dut.clock.step(1)
+        cycleCountReady += 1
+      }
+
+      dut.clock.step(1) //ready后需要主动前进一个时钟周期
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        dut.clock.step(1)
+        cycleCountMMAU += 1
+      }
+
+      println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
+
       
+
+      AME.apply.AMEStop(dut)  //停止，无效指令，valid = false
 
       AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(AMETestData.C, 5, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(AMETestData.C, 6, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(AMETestData.C, 7, dut) //验证结果是否正确
 
 
-      println(s"Total cycles: $cycleCount")
-
-
-      /***********************************************************************************/
-
-      // /*  跑第二条指令，看是否存在“脏数据”问题  */
-      // println(s"run again")
-      
-      // AME.apply.writeTestDataToAll(AMETestData.Ctmp, 4, dut)
-
-      // AME.apply.AMEStart(dut)//启动AME
-
-      // while(!dut.io.sigDone.peek().litToBoolean){
-      //   dut.clock.step(1)
-      //   // println(s"run in AME")
-      // }
-
-      // AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
-
-      
+ 
 
 
     }
@@ -73,6 +146,13 @@ class AMETest extends AnyFreeSpec with Matchers {
 }
 
 
+
+
+
+
+
+
+// //无Expander版本
 // class AMETest extends AnyFreeSpec with Matchers {
 
 //   "AME should PASS" in {
@@ -80,29 +160,47 @@ class AMETest extends AnyFreeSpec with Matchers {
     
       
 //       /*  提前手动写入A、B、C*/
-//       AME.apply.writeTestDataToTr(AMETestData.A, 0, dut)
-//       AME.apply.writeTestDataToTr(AMETestData.B, 1, dut)
-//       AME.apply.writeTestDataToAcc(AMETestData.Ctmp, 0, dut)
-//       // AME.apply.readTestDataFromTr(AMETestData.A, 0, dut)
-//       // AME.apply.readTestDataFromTr(AMETestData.B, 1, dut)
-//       // AME.apply.readTestDataFromAcc(AMETestData.Ctmp, 0, dut)
+//       AME.apply.writeTestDataToAll(AMETestData.A, 0, dut)
+//       AME.apply.writeTestDataToAll(AMETestData.B, 1, dut)
+//       AME.apply.writeTestDataToAll(AMETestData.Ctmp, 4, dut)
 
 //       dut.clock.step(1000) //随便跑几个cycle
 
-//       AME.apply.AMEStart(dut)//启动AME
+//       AME.apply.AMEStart(dut, 10, 10, 20, 0, 1, 4)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+
+//       var cycleCountMMAU = 0
 
 //       while(!dut.io.sigDone.peek().litToBoolean){
 //         dut.clock.step(1)
-//         // println(s"run in AME")
+//         cycleCountMMAU += 1
 //       }
 
-//       AME.apply.readTestDataFromAcc(AMETestData.C, 0, dut)
       
 
+//       AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
+
+
+//       println(s"Total cycles: $cycleCountMMAU")
+
+
+//       /***********************************************************************************/
+
+//       // /*  跑第二条指令，看是否存在“脏数据”问题  */
+//       // println(s"run again")
+      
+//       // AME.apply.writeTestDataToAll(AMETestData.Ctmp, 4, dut)
+
+//       // AME.apply.AMEStart(dut)//启动AME
+
+//       // while(!dut.io.sigDone.peek().litToBoolean){
+//       //   dut.clock.step(1)
+//       //   // println(s"run in AME")
+//       // }
+
+//       // AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
 
 //     }
 //   }
 // }
-
 
 

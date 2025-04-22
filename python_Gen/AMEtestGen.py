@@ -13,9 +13,9 @@ class MatrixGenerator:
         self.k = 2
 
         # 用户配置矩阵尺寸
-        self.mtilem = 13
-        self.mtilen = 12
-        self.mtilek = 31
+        self.mtilem = 32
+        self.mtilen = 32
+        self.mtilek = 64
 
         self.numM = self.tileM // self.m
         self.numN = self.tileN // self.n

@@ -4,6 +4,8 @@ import chisel3._
 import chisel3.util._
 
 import common._
+import Expander._
+
 
 
 /*    FSM与MMAU解耦，CTRL不包含任何状态机，纯数据通路，考虑sramLatency    */

@@ -15,6 +15,7 @@ import MMAU._
 class FSM extends MMAUFormat{
   val io = IO(new Bundle {
     val sigStart = Input(Bool())    //启动信号
+    val Ops_io = new Ops_IO //操作数矩阵
 
     // val firstMuxCtrl = Input(UInt(Consts.m.W)) //muxCtrlC和muxCtrlSum第一个值
     // val firstAddrReadA = Input(UInt(Consts.Tr_INDEX_LEN.W))  //AddrReadA第一个值
@@ -28,6 +29,12 @@ class FSM extends MMAUFormat{
 
   })
 
+  /*  表示工作状态或空闲状态 */
+  val regFSM_is_busy = RegInit(false.B) //true：工作状态；false：空闲状态，此时C写使能必为false
+
+
+
+  /*  表示工作状态内部的状态  */
   val regOffM = RegInit(0.U(log2Ceil(numM).W))   //log2,向上取整
   val regOffN = RegInit(0.U(log2Ceil(numN).W))
   val regOffK = RegInit(0.U(log2Ceil(numK).W))   //表示nState内部的numK个kState状态
@@ -90,12 +97,14 @@ class FSM extends MMAUFormat{
     regCntZero := regCntZero
   }
 
-  val regCntDone = RegInit(0.U(log2Ceil(n/4 + m).W)) //是属于sigDone相关寄存器，C的第一个bank的index0结束后（regCntDone开始计时）,还需等待n/4 + m 个周期,所有bank结束
+  val initVal = (n / 4 + m - 1)
+  val regCntDone = RegInit(9.U(4.W))//上电时即为满，是属于sigDone相关寄存器，C的第一个bank的index0结束后（regCntDone开始计时）,还需等待n/4 + m 个周期,所有bank结束
+  // val regCntDone = RegInit((n/4 + m - 1).U(log2Ceil(n/4 + m).W)) //上电时即为满，是属于sigDone相关寄存器，C的第一个bank的index0结束后（regCntDone开始计时）,还需等待n/4 + m 个周期,所有bank结束
 
   when(m.U < io.TileHandler_io.numk){
-    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regOffK >= 0.U && regOffK <= (m-1).U && regCntDone < m.U - sramLatency.U , true.B , false.B)
+    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regOffK >= 0.U && regOffK <= (m-1).U && regCntDone < m.U - sramLatency.U && regFSM_is_busy, true.B , false.B)
   }.otherwise{
-    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regCntDone < m.U - sramLatency.U , true.B , false.B)
+    io.FSM_io.firstEnWriteC := Mux(regCntZero === 1.U && regCntDone < m.U - sramLatency.U && regFSM_is_busy, true.B , false.B)
   }
 
 
@@ -111,23 +120,54 @@ class FSM extends MMAUFormat{
   }.elsewhen(wireDone === true.B || regCntDone > 0.U){
     regCntDone := regCntDone + 1.U
   }.otherwise{
-    regCntDone := 0.U
+    regCntDone := regCntDone
   }
 
-  io.sigDone := Mux(regCntDone === (n/4 + m - 1).U , true.B , false.B)
+  val wireSigDone = Wire(Bool())
+  wireSigDone := Mux(regCntDone === (n/4 + m - 1).U , true.B , false.B)
+  io.sigDone := wireSigDone //上电时，默认输出true
 
 
 
+  /*  表示FSM是否工作 */
+  //由空闲进入工作只能是start拉高，反之只能是done拉高
+  when(io.sigStart){
+    regFSM_is_busy := true.B  //start拉高，进入工作状态
+  }.elsewhen(wireSigDone){
+    regFSM_is_busy := false.B //done为真，进入空闲状态
+  }.otherwise{
+    regFSM_is_busy := regFSM_is_busy
+  }
 
+
+
+  /*    actPort   */
+  val regActPort = RegInit(false.B)
+
+  when(io.sigStart){  //仅在启动和结束之间的时间激活
+    regActPort := true.B
+  }.elsewhen(io.sigDone){
+    regActPort := false.B
+  }.otherwise{
+    regActPort := regActPort
+  }
+
+  io.FSM_io.actPortReadA := regActPort
+  io.FSM_io.actPortReadB := regActPort
+  io.FSM_io.actPortReadC := regActPort
+  io.FSM_io.actPortWriteC := regActPort
+
+  /*    Ops   */
+  io.FSM_io.Ops_io <> io.Ops_io
 
   // 打印提示信息（仅仿真有效）
   // when(io.FSM_io.firstEnWriteC) {
   //   printf(p"[INFO] firstEnWriteC is HIGH at cycle, offK = ${regOffK}, offN = ${regOffN}, offM = ${regOffM}\n")
   // }
 
-  // printf(p"offK = ${regOffK}, offN = ${regOffN}, offM = ${regOffM}    ")
+  // printf(p"offK = ${regOffK}, offN = ${regOffN}, offM = ${regOffM}    \n")
   // printf(p"addrA = ${io.FSM_io.firstAddrReadA} , addrB = ${io.FSM_io.firstAddrReadB} , addrC = ${io.FSM_io.firstAddrPublicC}\n")
-
+  // printf(p"sigStart = ${io.sigStart} , sigDone = ${io.sigDone}  , regCntDone = ${regCntDone}  regFSM_is_busy = ${regFSM_is_busy}\n")
 }
 
 

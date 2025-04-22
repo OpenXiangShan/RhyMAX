@@ -4,6 +4,7 @@ import chisel3._
 import chisel3.util._
 
 import common._
+import Expander._
 
 
 
@@ -34,6 +35,16 @@ class MMAU extends MMAUFormat {
     val addrReadC = Output(Vec(n/4 , UInt(Acc_INDEX_LEN.W)))
     val addrWriteC = Output(Vec(n/4 , UInt(Acc_INDEX_LEN.W)))
     val sigEnWriteC = Output(Vec(n/4 , Bool()))    //C写使能
+
+    val actPortReadA = Output(Bool())  //A读端口激活
+    val actPortReadB = Output(Bool())  //B读端口激活
+    val actPortReadC = Output(Bool())  //C读端口激活
+    val actPortWriteC = Output(Bool())  //C写端口激活
+
+    // val ms1 = Output(UInt(Consts.Tr_ADDR_LEN.W))
+    // val ms2 = Output(UInt(Consts.Tr_ADDR_LEN.W))
+    // val md = Output(UInt(Consts.Acc_ADDR_LEN.W))
+    val Ops_io = Flipped(new Ops_IO)
   })
 
   val subCUBE = Module(new CUBE)
@@ -87,6 +98,14 @@ class MMAU extends MMAUFormat {
     io.sigEnWriteC(i) := subCTRL.io.sigEnWriteC(i)
   }
   
+  /*    about actPort   */
+  io.actPortReadA := io.FSM_io.actPortReadA
+  io.actPortReadB := io.FSM_io.actPortReadB
+  io.actPortReadC := io.FSM_io.actPortReadC
+  io.actPortWriteC := io.FSM_io.actPortWriteC
+
+  /*    about Ops   */
+  io.Ops_io <> io.FSM_io.Ops_io
  
 }
 
