@@ -18,15 +18,38 @@ class ShakeHands_IO extends Bundle{//握手
   val ready = Output(Bool())
 }
 
-class Operands_IO extends Bundle{//译码信号
+class Operands_IO extends Bundle{//操作数信息
   val ms1 = Input(UInt(Consts.All_ADDR_LEN.W))
   val ms2 = Input(UInt(Consts.All_ADDR_LEN.W))
   val md = Input(UInt(Consts.All_ADDR_LEN.W))
+  val rs1 = Input(UInt(Consts.rs1_LEN.W)) //base addr
+  val rs2 = Input(UInt(Consts.rs2_LEN.W)) //stride
 }
 
 class InsType_IO extends Bundle{//指令类型
-  val is_mmacc = Input(Bool())      //整型矩阵乘
+  val is_mmacc = Input(Bool())      //整型矩阵乘,signed 8bit, output quad-widen
+  val is_mlbe8 = Input(Bool())      //load指令,8-bit right tile load
 }
+
+
+
+
+class mtileConfig_IO extends Bundle{
+  val mtilem = Input(UInt(log2Ceil(Consts.tileM+1).W))    //用户配置m维度长度
+  val mtilen = Input(UInt(log2Ceil(Consts.tileN+1).W))    //用户配置n维度长度
+  val mtilek = Input(UInt(log2Ceil(Consts.tileK+1).W))    //用户配置k维度长度
+}
+
+
+class Uop_IO extends Bundle{  //微操作序列
+  val ShakeHands_io = new ShakeHands_IO
+  val Operands_io = new Operands_IO
+  val InsType_io = new InsType_IO
+  val mtileConfig_io = new mtileConfig_IO
+}
+
+
+/*    计分板    */
 
 class ScoreboardVisit_IO extends Bundle{//与计分板交互
   val read_RF = Input(UInt(8.W))    //读取RF资源使用情况
@@ -36,9 +59,6 @@ class ScoreboardVisit_IO extends Bundle{//与计分板交互
   val writeMaskFree_RF = Output(UInt(8.W))   //释放RF，掩码形式  
   val writeMaskFree_Unit = Output(UInt(4.W)) //释放功能单元，掩码形式
 }
-
-
-
 
 
 
@@ -56,7 +76,7 @@ object applyTileHandler {
 
 
 
-class TileHandler_IO extends Bundle{
+class TileHandler_MMAU_IO extends Bundle{
     // val tilem = Output(UInt(log2Ceil(Consts.tileM+1).W))   //padding后m维度的长度，供计算单元使用
     // val tilen = Output(UInt(log2Ceil(Consts.tileN+1).W))   //padding后n维度的长度，供计算单元使用
     // val tilek = Output(UInt(log2Ceil(Consts.tileK+1).W))   //padding后k维度的长度，供计算单元使用
@@ -65,11 +85,7 @@ class TileHandler_IO extends Bundle{
     val numk = Output(UInt(log2Ceil(Consts.numK+1).W))
 }
 
-class mtileConfig_IO extends Bundle{
-  val mtilem = Input(UInt(log2Ceil(Consts.tileM+1).W))    //用户配置m维度长度
-  val mtilen = Input(UInt(log2Ceil(Consts.tileN+1).W))    //用户配置n维度长度
-  val mtilek = Input(UInt(log2Ceil(Consts.tileK+1).W))    //用户配置k维度长度
-}
+
 
 
 
@@ -78,7 +94,7 @@ class mtileConfig_IO extends Bundle{
 /*    FSM   */
 
 //CTRL、MMAU、FSM公共
-class FSM_IO extends Bundle {   
+class FSM_MMAU_IO extends Bundle {   
   // val sigStart = Input(Bool())    //启动信号，由FSM传入
   // val sigDone = Input(Bool())    //结束信号，由FSM传入
   val firstMuxCtrl = Input(UInt(Consts.m.W)) //muxCtrlC和muxCtrlSum第一个值
@@ -108,9 +124,16 @@ class Ops_IO extends Bundle{
 
 class IssueMMAU_Excute_IO extends Bundle{//连接ExcuteHandler
   val sigStart = Input(Bool())    //启动信号
-  val is_shaked = Input(Bool()) //是否握手成功
+  // val is_shaked = Input(Bool()) //是否握手成功
+  val in_ms1 = Input(UInt(Consts.All_ADDR_LEN.W))  //初始值
+  val in_ms2 = Input(UInt(Consts.All_ADDR_LEN.W))
+  val in_md = Input(UInt(Consts.All_ADDR_LEN.W))
+  val mtilem = Input(UInt(log2Ceil(Consts.tileM+1).W))    //用户配置m维度长度
+  val mtilen = Input(UInt(log2Ceil(Consts.tileN+1).W))    //用户配置n维度长度
+  val mtilek = Input(UInt(log2Ceil(Consts.tileK+1).W))    //用户配置k维度长度
+
   val sigDone = Output(Bool())    //结束信号
-  val ms1 = Output(UInt(Consts.All_ADDR_LEN.W))
-  val ms2 = Output(UInt(Consts.All_ADDR_LEN.W))
-  val md = Output(UInt(Consts.All_ADDR_LEN.W))
+  val out_ms1 = Output(UInt(Consts.All_ADDR_LEN.W)) //结束时用于回收
+  val out_ms2 = Output(UInt(Consts.All_ADDR_LEN.W))
+  val out_md = Output(UInt(Consts.All_ADDR_LEN.W))
 }

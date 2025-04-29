@@ -16,7 +16,7 @@ import common._
 class TileHandlerTest extends AnyFreeSpec with Matchers {
 
   "TileHandler should PASS" in {
-    simulate(new TileHandler) { dut =>
+    simulate(new TileHandler_MMAU) { dut =>
     
       // 输入用户配置尺寸
       dut.io.mtileConfig_io.mtilem.poke(32.U)
@@ -24,12 +24,12 @@ class TileHandlerTest extends AnyFreeSpec with Matchers {
       dut.io.mtileConfig_io.mtilek.poke(64.U)
 
       // 打印输出，不前进时钟
-      // println(s"tilem = ${dut.io.TileHandler_io.tilem.peek().litValue}")
-      // println(s"tilen = ${dut.io.TileHandler_io.tilen.peek().litValue}")
-      // println(s"tilek = ${dut.io.TileHandler_io.tilek.peek().litValue}")
-      println(s"numm  = ${dut.io.TileHandler_io.numm.peek().litValue}")
-      println(s"numn  = ${dut.io.TileHandler_io.numn.peek().litValue}")
-      println(s"numk  = ${dut.io.TileHandler_io.numk.peek().litValue}")
+      // println(s"tilem = ${dut.io.TileHandler_MMAU_io.tilem.peek().litValue}")
+      // println(s"tilen = ${dut.io.TileHandler_MMAU_io.tilen.peek().litValue}")
+      // println(s"tilek = ${dut.io.TileHandler_MMAU_io.tilek.peek().litValue}")
+      println(s"numm  = ${dut.io.TileHandler_MMAU_io.numm.peek().litValue}")
+      println(s"numn  = ${dut.io.TileHandler_MMAU_io.numn.peek().litValue}")
+      println(s"numk  = ${dut.io.TileHandler_MMAU_io.numk.peek().litValue}")
       
     }
   }

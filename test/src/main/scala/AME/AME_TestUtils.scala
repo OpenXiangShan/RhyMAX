@@ -171,24 +171,27 @@ object apply {
 
 
   /*  完整Expander版本   */
-  def AMEStart(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , A: Int , B: Int , C: Int , valid: Bool , is_mmacc: Bool): Unit = {  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+  def AMEStart(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool): Unit = {  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
     // dut.io.sigStart.poke(true.B)  //启动信号
 
     // 输入用户配置尺寸
-    dut.io.mtileConfig_io.mtilem.poke(mtilem.U)
-    dut.io.mtileConfig_io.mtilen.poke(mtilen.U)
-    dut.io.mtileConfig_io.mtilek.poke(mtilek.U)
+    dut.io.Uop_io.mtileConfig_io.mtilem.poke(mtilem.U)
+    dut.io.Uop_io.mtileConfig_io.mtilen.poke(mtilen.U)
+    dut.io.Uop_io.mtileConfig_io.mtilek.poke(mtilek.U)
 
     // 确定操作数矩阵
-    dut.io.Operands_io.ms1.poke(A.U)
-    dut.io.Operands_io.ms2.poke(B.U)
-    dut.io.Operands_io.md.poke(C.U)
+    dut.io.Uop_io.Operands_io.ms1.poke(ms1.U)
+    dut.io.Uop_io.Operands_io.ms2.poke(ms2.U)
+    dut.io.Uop_io.Operands_io.md.poke(md.U)
+    dut.io.Uop_io.Operands_io.rs1.poke(rs1.U)
+    dut.io.Uop_io.Operands_io.rs2.poke(rs2.U)
 
     //valid信号
-    dut.io.ShakeHands_io.valid.poke(valid)
+    dut.io.Uop_io.ShakeHands_io.valid.poke(valid)
 
     //InsType_io信号
-    dut.io.InsType_io.is_mmacc.poke(is_mmacc)
+    dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
+    dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
 
     // dut.clock.step(1)
 
@@ -196,7 +199,7 @@ object apply {
   }
 
   def AMEStop(dut: AME): Unit = {
-    AMEStart(dut, 0, 0, 0, 0, 0, 0, false.B, false.B)
+    AMEStart(dut, 0, 0, 0, 0, 0, 0, 0, 0, false.B, false.B, false.B)
   }
 
 

@@ -12,7 +12,7 @@ import Expander._
 class CTRL extends MMAUFormat{
   val io = IO(new Bundle {
 
-    val FSM_io = new FSM_IO
+    val FSM_MMAU_io = new FSM_MMAU_IO
 
 
     val muxCtrlC = Output(Vec(m , Vec(n/4 , Bool())))     
@@ -31,7 +31,7 @@ class CTRL extends MMAUFormat{
   require(sramLatency >= 1)
   val regLatency = Reg(Vec(sramLatency , UInt(m.W)))  //考虑访存延迟引入
   regLatency.foreach(_ := 0.U)
-  regLatency(0) := io.FSM_io.firstMuxCtrl
+  regLatency(0) := io.FSM_MMAU_io.firstMuxCtrl
   for (i <- 1 until sramLatency) {
     regLatency(i) := regLatency(i - 1)
   }
@@ -62,25 +62,25 @@ class CTRL extends MMAUFormat{
   val regDelayA = Reg(Vec(m-1, UInt(Tr_INDEX_LEN.W)))  // 定义寄存器组
   regDelayA.foreach(_ := 0.U)  // 初始化所有寄存器为 0
   
-  regDelayA(0) := io.FSM_io.firstAddrReadA
+  regDelayA(0) := io.FSM_MMAU_io.firstAddrReadA
   for(i <- 1 until m-1){
     regDelayA(i) := regDelayA(i-1)   //reg组内部连接,实现"数据流动"的效果
   }
 
-  io.addrReadA(0) := io.FSM_io.firstAddrReadA
+  io.addrReadA(0) := io.FSM_MMAU_io.firstAddrReadA
   for(i <- 1 until m){
     io.addrReadA(i) := regDelayA(i-1)
   }
 
   /*    read matrixB    */
 
-  io.addrReadB(0) := io.FSM_io.firstAddrReadB  
+  io.addrReadB(0) := io.FSM_MMAU_io.firstAddrReadB  
 
   if(n > 4){
     val regDelayB = Reg(Vec(n/4 - 1, UInt(Tr_INDEX_LEN.W)))  // 定义寄存器组
     regDelayB.foreach(_ := 0.U)  // 初始化所有寄存器为 0
 
-    regDelayB(0) := io.FSM_io.firstAddrReadB
+    regDelayB(0) := io.FSM_MMAU_io.firstAddrReadB
     for(i <- 1 until n/4 - 1){
       regDelayB(i) := regDelayB(i-1)   //reg组内部连接,实现"数据流动"的效果
     }
@@ -98,12 +98,12 @@ class CTRL extends MMAUFormat{
   val regDelayC = Reg(Vec(numRegDelayC , UInt(Acc_INDEX_LEN.W)))
   regDelayC.foreach(_ := 0.U)
 
-  regDelayC(0) := io.FSM_io.firstAddrPublicC
+  regDelayC(0) := io.FSM_MMAU_io.firstAddrPublicC
   for(i <- 1 until numRegDelayC){
     regDelayC(i) := regDelayC(i-1)
   }
 
-  io.addrReadC(0) := io.FSM_io.firstAddrPublicC
+  io.addrReadC(0) := io.FSM_MMAU_io.firstAddrPublicC
   for(i <- 1 until n/4){
     io.addrReadC(i) := regDelayC(i-1)
   } 
@@ -117,7 +117,7 @@ class CTRL extends MMAUFormat{
   //write C enable
 
   val regDelayEnWriteCLatency =  Reg(Vec(sramLatency , Bool()))
-  regDelayEnWriteCLatency(0) := io.FSM_io.firstEnWriteC
+  regDelayEnWriteCLatency(0) := io.FSM_MMAU_io.firstEnWriteC
   for(i <- 1 until sramLatency){
       regDelayEnWriteCLatency(i) := regDelayEnWriteCLatency(i-1)
   }

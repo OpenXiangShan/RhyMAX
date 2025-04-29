@@ -8,10 +8,10 @@ import MMAU._
 
 
 // //用于处理Tile各维度相关参数
-class TileHandler extends MMAUFormat {
+class TileHandler_MMAU extends MMAUFormat {
   val io = IO(new Bundle {
     val mtileConfig_io = new mtileConfig_IO   //用户配置尺寸
-    val TileHandler_io = new TileHandler_IO   //padding后的numm,numn,numk
+    val TileHandler_MMAU_io = new TileHandler_MMAU_IO   //padding后的numm,numn,numk
   })
 
   // 计算 log2 常量（m/n/k 是 2 的幂次）
@@ -30,12 +30,12 @@ class TileHandler extends MMAUFormat {
     tilek := applyTileHandler.ceilAlignPow2(io.mtileConfig_io.mtilek, log2k)
   }
 
-  // io.TileHandler_io.tilem := tilem
-  // io.TileHandler_io.tilen := tilen
-  // io.TileHandler_io.tilek := tilek
+  // io.TileHandler_MMAU_io.tilem := tilem
+  // io.TileHandler_MMAU_io.tilen := tilen
+  // io.TileHandler_MMAU_io.tilek := tilek
 
   // 替代除法为右移
-  io.TileHandler_io.numm := tilem >> log2m.U
-  io.TileHandler_io.numn := tilen >> log2n.U
-  io.TileHandler_io.numk := tilek >> log2k.U
+  io.TileHandler_MMAU_io.numm := tilem >> log2m.U
+  io.TileHandler_MMAU_io.numn := tilen >> log2n.U
+  io.TileHandler_MMAU_io.numk := tilek >> log2k.U
 }

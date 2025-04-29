@@ -23,7 +23,7 @@ class MMAU extends MMAUFormat {
     // val firstAddrReadB = Input(UInt(Tr_INDEX_LEN.W))  //AddrReadB第一个值
     // val firstAddrPublicC = Input(UInt(Acc_INDEX_LEN.W)) //AddrC第一个读写公共地址
     // val firstEnWriteC = Input(Bool()) //C第一个写使能
-    val FSM_io = new FSM_IO
+    val FSM_MMAU_io = new FSM_MMAU_IO
 
     val vecA = Input(Vec(m, UInt((k * 8).W)))  // vecA 为 m 长度的向量，每个元素为 UInt(k*8.W)
     val vecB = Input(Vec(n, UInt((k * 8).W)))  // vecB 为 n 长度的向量，每个元素为 UInt(k*8.W)
@@ -81,7 +81,7 @@ class MMAU extends MMAUFormat {
 
   /*    about subCTRL     */
   
-  subCTRL.io.FSM_io <> io.FSM_io
+  subCTRL.io.FSM_MMAU_io <> io.FSM_MMAU_io
 
   for(i <- 0 until m){
     io.addrReadA(i) := subCTRL.io.addrReadA(i)
@@ -99,13 +99,13 @@ class MMAU extends MMAUFormat {
   }
   
   /*    about actPort   */
-  io.actPortReadA := io.FSM_io.actPortReadA
-  io.actPortReadB := io.FSM_io.actPortReadB
-  io.actPortReadC := io.FSM_io.actPortReadC
-  io.actPortWriteC := io.FSM_io.actPortWriteC
+  io.actPortReadA := io.FSM_MMAU_io.actPortReadA
+  io.actPortReadB := io.FSM_MMAU_io.actPortReadB
+  io.actPortReadC := io.FSM_MMAU_io.actPortReadC
+  io.actPortWriteC := io.FSM_MMAU_io.actPortWriteC
 
   /*    about Ops   */
-  io.Ops_io <> io.FSM_io.Ops_io
+  io.Ops_io <> io.FSM_MMAU_io.Ops_io
  
 }
 

@@ -41,9 +41,9 @@ class AMETest extends AnyFreeSpec with Matchers {
       var cycleCountMMAU = 0
       var cycleCountReady = 0
 
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 4, true.B, true.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 4, 0, 0, true.B, true.B, false.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
 
-      while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
+      while(!dut.io.Uop_io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
         dut.clock.step(1)
         cycleCountReady += 1
       }
@@ -53,7 +53,7 @@ class AMETest extends AnyFreeSpec with Matchers {
 println(s"ins 1 excuting")
 
 
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //下一条指令ins2，应该没有响应
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, 0, 0, true.B, true.B, false.B)  //下一条指令ins2，应该没有响应
 
 
       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
@@ -73,7 +73,7 @@ println(s"ins 1 excuting")
 
       // AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //下一条指令，换一个C
 
-      while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
+      while(!dut.io.Uop_io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
         dut.clock.step(1)
         cycleCountReady += 1
       }
@@ -82,7 +82,7 @@ println(s"ins 1 excuting")
 
 println(s"ins 2 excuting")
 
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, true.B, true.B)  //下一条指令ins3，应该没有响应
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, 0, 0, true.B, true.B, false.B)  //下一条指令ins3，应该没有响应
 
       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
         dut.clock.step(1)
@@ -100,7 +100,7 @@ println(s"ins 2 excuting")
 
       // AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, true.B, true.B)  //下一条指令，换一个C
 
-      while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
+      while(!dut.io.Uop_io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
         dut.clock.step(1)
         cycleCountReady += 1
       }

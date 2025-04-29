@@ -19,10 +19,12 @@ class AME extends Module {
 
     // val mtileConfig_io = new mtileConfig_IO //配置矩阵形状
     // val Operands_io = new Operands_IO //译码信号
-    val ShakeHands_io = new ShakeHands_IO
-    val Operands_io = new Operands_IO
-    val InsType_io = new InsType_IO
-    val mtileConfig_io = new mtileConfig_IO
+
+    // val ShakeHands_io = new ShakeHands_IO
+    // val Operands_io = new Operands_IO
+    // val InsType_io = new InsType_IO
+    // val mtileConfig_io = new mtileConfig_IO
+    val Uop_io = new Uop_IO
 
     val writeAll = new RegFileAllWriteIO  //通用读端口
     val readAll = new RegFileAllReadIO  //通用写端口
@@ -49,10 +51,11 @@ class AME extends Module {
   io.readAll <> subRegFile.io.readAll(0)
 
   /*  between Top and Expander  */
-  io.ShakeHands_io <> subExpander.io.ShakeHands_io
-  io.Operands_io <> subExpander.io.Operands_io
-  io.InsType_io <> subExpander.io.InsType_io
-  io.mtileConfig_io <> subExpander.io.mtileConfig_io
+  // io.ShakeHands_io <> subExpander.io.ShakeHands_io
+  // io.Operands_io <> subExpander.io.Operands_io
+  // io.InsType_io <> subExpander.io.InsType_io
+  // io.mtileConfig_io <> subExpander.io.mtileConfig_io
+  io.Uop_io <> subExpander.io.Uop_io
 
   /*  between Top and ScoreBoard  */
   // nothing
@@ -96,7 +99,7 @@ class AME extends Module {
   )
 
   /*  between MMAU and Expander  */
-  subMMAU.io.FSM_io <> subExpander.io.FSM_io
+  subMMAU.io.FSM_MMAU_io <> subExpander.io.FSM_MMAU_io
 
   /*  between MMAU and ScoreBoard  */
   // nothing
@@ -148,7 +151,7 @@ class AME extends Module {
 //   subTileHandler.io.mtileConfig_io <> io.mtileConfig_io
 
 //   /*  between TileHandler and FSM */
-//   subTileHandler.io.TileHandler_io <> subFSM.io.TileHandler_io
+//   subTileHandler.io.TileHandler_MMAU_io <> subFSM.io.TileHandler_MMAU_io
 
 
   
@@ -210,7 +213,7 @@ class AME extends Module {
 
 
 //   /* between FSM and MMAU*/
-//   subMMAU.io.FSM_io <> subFSM.io.FSM_io
+//   subMMAU.io.FSM_MMAU_io <> subFSM.io.FSM_MMAU_io
 
 // }
 

@@ -92,6 +92,12 @@ object Consts {
   val All_INDEX_LEN   = log2Ceil(setAll)
   val All_ADDR_LEN     = log2Ceil(numAcc + numTr) //表示所有寄存器标号所需位宽（0～7）
 
+
+
+  // Load / Store
+  val rs1_LEN = 16
+  val rs2_LEN = 16
+
 }
 
 class MMAUFormat extends Module{
