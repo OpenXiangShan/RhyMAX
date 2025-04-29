@@ -20,7 +20,7 @@ class IssueMMAU extends Module{
   })    
 
   val subTileHandler = Module(new TileHandler)
-  val subFSM = Module(new FSM)
+  val subFSM = Module(new FSM_MMAU)
   //存该条指令有关信息
   val reg_mtilem = RegInit(0.U(log2Ceil(Consts.tileM+1).W))
   val reg_mtilen = RegInit(0.U(log2Ceil(Consts.tileN+1).W))

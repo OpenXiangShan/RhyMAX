@@ -22,6 +22,12 @@ class ExcuteHandler extends Module{
   val ms2 = io.Operands_io.ms2
   val md = io.Operands_io.md
 
+  val MLU_Bit = 0
+  val MSU_Bit = 1
+  val MMAU_Bit = 2
+  val MISC_Bit = 3
+  val EWU_Bit = 4
+
   //default
   io.ScoreboardVisit_io.writeMaskAlloc_RF := 0.U
   io.ScoreboardVisit_io.writeMaskAlloc_Unit := 0.U
@@ -38,7 +44,7 @@ class ExcuteHandler extends Module{
 
   /*    mma    */
   val mmaReg_is_free = ( io.ScoreboardVisit_io.read_RF(ms1) | io.ScoreboardVisit_io.read_RF(ms2) |io.ScoreboardVisit_io.read_RF(md) ) === 0.U
-  val mmaUnit_is_free = io.ScoreboardVisit_io.read_Unit(1) === 0.U
+  val mmaUnit_is_free = io.ScoreboardVisit_io.read_Unit(MMAU_Bit) === 0.U
 
   when(io.InsType_io.is_mmacc){
     is_ready := mmaReg_is_free && mmaUnit_is_free
@@ -48,12 +54,12 @@ class ExcuteHandler extends Module{
 
   when(io.InsType_io.is_mmacc && is_shaked){//分配资源
     io.ScoreboardVisit_io.writeMaskAlloc_RF := (1.U << ms1) | (1.U << ms2) | (1.U << md)
-    io.ScoreboardVisit_io.writeMaskAlloc_Unit := (1.U << 1)
+    io.ScoreboardVisit_io.writeMaskAlloc_Unit := (1.U << MMAU_Bit)
   }
 
   when(io.IssueMMAU_Excute_io.sigDone){//释放资源
     io.ScoreboardVisit_io.writeMaskFree_RF := (1.U << io.IssueMMAU_Excute_io.ms1) | (1.U << io.IssueMMAU_Excute_io.ms2) | (1.U << io.IssueMMAU_Excute_io.md)
-    io.ScoreboardVisit_io.writeMaskFree_Unit := (1.U << 1)
+    io.ScoreboardVisit_io.writeMaskFree_Unit := (1.U << MMAU_Bit)
   }
 
   io.IssueMMAU_Excute_io.is_shaked := is_shaked

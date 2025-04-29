@@ -4,13 +4,22 @@ import os
 class MatrixGenerator:
     def __init__(self):
         # 硬件参数初始化
-        self.tileM = 32
-        self.tileN = 32
-        self.tileK = 64
+        # self.tileM = 32
+        # self.tileN = 32
+        # self.tileK = 64
 
-        self.m = 8
-        self.n = 8
-        self.k = 2
+        # self.m = 8
+        # self.n = 8
+        # self.k = 2
+
+        self.tileM = 64
+        self.tileN = 64
+        self.tileK = 256
+
+        self.m = 32
+        self.n = 32
+        self.k = 8
+
 
         # 用户配置矩阵尺寸
         self.mtilem = 32

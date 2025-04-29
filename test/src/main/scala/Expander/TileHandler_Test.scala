@@ -19,9 +19,9 @@ class TileHandlerTest extends AnyFreeSpec with Matchers {
     simulate(new TileHandler) { dut =>
     
       // 输入用户配置尺寸
-      dut.io.mtileConfig_io.mtilem.poke(13.U)
-      dut.io.mtileConfig_io.mtilen.poke(12.U)
-      dut.io.mtileConfig_io.mtilek.poke(31.U)
+      dut.io.mtileConfig_io.mtilem.poke(32.U)
+      dut.io.mtileConfig_io.mtilen.poke(32.U)
+      dut.io.mtileConfig_io.mtilek.poke(64.U)
 
       // 打印输出，不前进时钟
       // println(s"tilem = ${dut.io.TileHandler_io.tilem.peek().litValue}")

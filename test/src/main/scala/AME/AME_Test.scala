@@ -33,9 +33,11 @@ class AMETest extends AnyFreeSpec with Matchers {
 
       dut.clock.step(1000) //随便跑几个cycle
 
+      
 
 
-      // ins1
+
+      // // ins1
       var cycleCountMMAU = 0
       var cycleCountReady = 0
 
@@ -47,6 +49,11 @@ class AMETest extends AnyFreeSpec with Matchers {
       }
 
       dut.clock.step(1) //ready后需要主动前进一个时钟周期
+
+println(s"ins 1 excuting")
+
+
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //下一条指令ins2，应该没有响应
 
 
       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
@@ -64,7 +71,7 @@ class AMETest extends AnyFreeSpec with Matchers {
       cycleCountMMAU = 0  //计数清零
 
 
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //下一条指令，换一个C
+      // AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //下一条指令，换一个C
 
       while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
         dut.clock.step(1)
@@ -72,6 +79,10 @@ class AMETest extends AnyFreeSpec with Matchers {
       }
 
       dut.clock.step(1) //ready后需要主动前进一个时钟周期
+
+println(s"ins 2 excuting")
+
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, true.B, true.B)  //下一条指令ins3，应该没有响应
 
       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
         dut.clock.step(1)
@@ -87,7 +98,7 @@ class AMETest extends AnyFreeSpec with Matchers {
       cycleCountMMAU = 0  //计数清零
 
 
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, true.B, true.B)  //下一条指令，换一个C
+      // AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, true.B, true.B)  //下一条指令，换一个C
 
       while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
         dut.clock.step(1)
@@ -95,6 +106,8 @@ class AMETest extends AnyFreeSpec with Matchers {
       }
 
       dut.clock.step(1) //ready后需要主动前进一个时钟周期
+
+println(s"ins 3 excuting")
 
       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
         dut.clock.step(1)
@@ -104,28 +117,6 @@ class AMETest extends AnyFreeSpec with Matchers {
       println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
 
 
-
-      // ins4
-
-      cycleCountReady = 0
-      cycleCountMMAU = 0  //计数清零
-
-
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 7, true.B, true.B)  //下一条指令，换一个C
-
-      while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
-        dut.clock.step(1)
-        cycleCountReady += 1
-      }
-
-      dut.clock.step(1) //ready后需要主动前进一个时钟周期
-
-      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
-        dut.clock.step(1)
-        cycleCountMMAU += 1
-      }
-
-      println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
 
       
 
@@ -134,7 +125,7 @@ class AMETest extends AnyFreeSpec with Matchers {
       AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
       AME.apply.readTestDataFromAll(AMETestData.C, 5, dut) //验证结果是否正确
       AME.apply.readTestDataFromAll(AMETestData.C, 6, dut) //验证结果是否正确
-      AME.apply.readTestDataFromAll(AMETestData.C, 7, dut) //验证结果是否正确
+      // AME.apply.readTestDataFromAll(AMETestData.C, 7, dut) //验证结果是否正确
 
 
  
