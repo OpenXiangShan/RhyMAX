@@ -7,5 +7,4 @@ build/
 .bloop/
 .metals/
 .vscode/
-output.txt
-
+*.txt

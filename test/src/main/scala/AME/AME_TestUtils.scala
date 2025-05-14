@@ -152,7 +152,7 @@ object apply {
         val readValue = dut.io.readAll.r(bankIdx).resp.data.head.asUInt.peek()
         val status = if (readValue.litValue == data.litValue) "PASS" else "FAILED"
         // println(s"Bank $bankIdx, Set $setIdx - Read value: ${readValue.litValue}, Expected: ${data.litValue} [$status]") //十进制
-        // println(f"Bank $bankIdx, Set $setIdx - Read value: 0x${readValue.litValue.toString(16)}%s, Expected: 0x${data.litValue.toString(16)}%s [$status]") //十六进制
+        println(f"Bank $bankIdx, Set $setIdx - Read value: 0x${readValue.litValue.toString(16)}%s, Expected: 0x${data.litValue.toString(16)}%s [$status]") //十六进制
 
         dut.io.readAll.r(bankIdx).resp.data.head.asUInt.expect(data)
 

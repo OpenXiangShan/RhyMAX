@@ -26,8 +26,8 @@ class AME extends Module {
     // val mtileConfig_io = new mtileConfig_IO
     val Uop_io = new Uop_IO
 
-    val writeAll = new RegFileAllWriteIO  //通用读端口
-    val readAll = new RegFileAllReadIO  //通用写端口
+    val writeAll = new RegFileAllWrite_IO  //通用读端口
+    val readAll = new RegFileAllRead_IO  //通用写端口
 
 
     val sigDone = Output(Bool())    // for debug
@@ -134,8 +134,8 @@ class AME extends Module {
 
 //     val mtileConfig_io = new mtileConfig_IO //配置矩阵形状
 //     val Operands_io = new Operands_IO //译码信号
-//     val writeAll = new RegFileAllWriteIO  //通用读端口
-//     val readAll = new RegFileAllReadIO  //通用写端口
+//     val writeAll = new RegFileAllWrite_IO  //通用读端口
+//     val readAll = new RegFileAllRead_IO  //通用写端口
 
 
 //     val sigDone = Output(Bool())    // 结束信号

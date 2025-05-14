@@ -85,13 +85,18 @@ class TileHandler_MMAU_IO extends Bundle{
     val numk = Output(UInt(log2Ceil(Consts.numK+1).W))
 }
 
+class TileHandler_MLU_IO extends Bundle{
+  val nRow = Output(UInt(Consts.nRow_LEN.W))
+  val nCol = Output(UInt(Consts.nCol_LEN.W))
+}
 
 
 
 
 
 
-/*    FSM   */
+
+/*    MMAU   */
 
 //CTRL、MMAU、FSM公共
 class FSM_MMAU_IO extends Bundle {   
@@ -136,4 +141,44 @@ class IssueMMAU_Excute_IO extends Bundle{//连接ExcuteHandler
   val out_ms1 = Output(UInt(Consts.All_ADDR_LEN.W)) //结束时用于回收
   val out_ms2 = Output(UInt(Consts.All_ADDR_LEN.W))
   val out_md = Output(UInt(Consts.All_ADDR_LEN.W))
+}
+
+/*    MLU   */
+
+class Cacheline_Read_IO extends Bundle{
+  val addr = Output(UInt(Consts.L2_ADDR_LEN.W))
+  val id = Output(UInt(Consts.L2_ID_LEN.W))
+}
+
+class Cacheline_ReadBack_IO extends Bundle{
+  val data = Input(UInt((64 * 8).W))  //64B
+  val id = Input(UInt(Consts.L2_ID_LEN.W))
+  val valid = Input(Bool()) //标志L2过来的数据是否有效
+}
+
+class FSM_MLU_IO extends Bundle{  //连接下一级
+  val Cacheline_Read_io = Vec(8 , new Cacheline_Read_IO)
+  val md = Output(UInt(Consts.All_ADDR_LEN.W))
+  val sigDone = Input(Bool())
+}
+
+class MLU_L2_IO extends Bundle{
+  val Cacheline_Read_io = Vec(8 , new Cacheline_Read_IO)
+  val Cacheline_ReadBack_io = Vec(8 , new Cacheline_ReadBack_IO)
+}
+
+//IssueMLU
+
+class IssueMLU_Excute_IO extends Bundle{//连接ExcuteHandler
+  val sigStart = Input(Bool())    //启动信号
+  // val is_shaked = Input(Bool()) //是否握手成功
+  val rs1 = Input(UInt(Consts.rs1_LEN.W))  //初始值
+  val rs2 = Input(UInt(Consts.rs2_LEN.W))
+  val in_md = Input(UInt(Consts.All_ADDR_LEN.W))
+  val mtilem = Input(UInt(log2Ceil(Consts.tileM+1).W))    //用户配置m维度长度
+  val mtilen = Input(UInt(log2Ceil(Consts.tileN+1).W))    //用户配置n维度长度
+  val mtilek = Input(UInt(log2Ceil(Consts.tileK+1).W))    //用户配置k维度长度
+
+  val sigDone = Output(Bool())    //结束信号
+  val out_md = Output(UInt(Consts.All_ADDR_LEN.W))  //结束时用于回收
 }

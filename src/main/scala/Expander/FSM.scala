@@ -12,7 +12,7 @@ import MMAU._
 
 
 //MMAU latency = numm * numn * numk + 2*sramlatency + m + n/4 -2
-class FSM_MMAU_MMAU extends MMAUFormat{
+class FSM_MMAU extends MMAUFormat{
   val io = IO(new Bundle {
     val sigStart = Input(Bool())    //启动信号
     val Ops_io = new Ops_IO //操作数矩阵
@@ -169,6 +169,64 @@ class FSM_MMAU_MMAU extends MMAUFormat{
   // printf(p"offK = ${regOffK}, offN = ${regOffN}, offM = ${regOffM}    \n")
   // printf(p"addrA = ${io.FSM_MMAU_io.firstAddrReadA} , addrB = ${io.FSM_MMAU_io.firstAddrReadB} , addrC = ${io.FSM_MMAU_io.firstAddrPublicC}\n")
   // printf(p"sigStart = ${io.sigStart} , sigDone = ${io.sigDone}  , regCntDone = ${regCntDone}  regFSM_MMAU_is_busy = ${regFSM_MMAU_is_busy}\n")
+}
+
+
+
+
+
+
+class FSM_MLU extends Module{ //MLU状态机
+  val io = IO(new Bundle {
+    val sigStart = Input(Bool())    //启动信号
+    val rs1 = Input(UInt(Consts.rs1_LEN.W))  
+    val rs2 = Input(UInt(Consts.rs2_LEN.W))
+    val md = Input(UInt(Consts.All_ADDR_LEN.W))
+    val TileHandler_MLU_io = Flipped(new TileHandler_MLU_IO)  //padding后用于设置状态机
+    val FSM_MLU_io = new FSM_MLU_IO //连接下层MLU
+
+    val sigDone = Output(Bool()) 
+  })
+
+  /*  TileHandler_MLU_io  */
+  val nRow = io.TileHandler_MLU_io.nRow 
+  val nCol = io.TileHandler_MLU_io.nCol 
+
+  /*  op  */
+  val baseAddr = io.rs1
+  val stride = io.rs2
+
+  //标记状态
+  val regRow = RegInit(0.U(Consts.nRow_LEN.W))
+  val regCol = RegInit(0.U(Consts.nCol_LEN.W))
+
+
+  regRow := Mux(io.sigStart , 0.U , 
+              Mux(regRow === nRow , 0.U , regRow + 1.U))
+
+  regCol := Mux(io.sigStart , 0.U , 
+              Mux(regRow === nRow , regCol + 1.U , regCol))
+
+  /*  FSM_MLU_io  */
+  for(y <- 0 until 8){
+    io.FSM_MLU_io.Cacheline_Read_io(y).addr := baseAddr + (regRow * 8.U + y.U) * stride + regCol
+    io.FSM_MLU_io.Cacheline_Read_io(y).id := Cat(regCol , regRow)
+  }
+
+  io.FSM_MLU_io.md := io.md
+
+  /*  sigDone   */
+  io.sigDone := Mux(regRow === nRow && regCol === nCol , true.B , false.B)  //暂时先这么处理把
+
+
+
+  /*    debug   */
+  printf(p"regRow = $regRow , regCol = $regCol , sigStart = ${io.sigStart} , sigDone = ${io.sigDone}\n")
+  for(i <- 0 until 8){
+    printf(p"$i : addr = ${io.FSM_MLU_io.Cacheline_Read_io(i).addr} , id = ${io.FSM_MLU_io.Cacheline_Read_io(i).id}\n")
+  }
+  printf(p"\n\n")
+
 }
 
 
