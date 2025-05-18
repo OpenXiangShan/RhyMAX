@@ -1,5 +1,5 @@
 BUILD_DIR = ./build
-TEST_NAME ?= MMAU.MMAUTestExpect
+TEST_NAME ?= AME.AMETest
 SV_NAME ?= PEcube_sv
 PYTHON_NAME ?= AMEtestGen.py
 

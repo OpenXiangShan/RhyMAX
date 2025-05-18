@@ -5,6 +5,8 @@ import chisel3.util._
 
 import common._
 
+import fpu.core._
+
 // class DPA(k: Int) extends Module {
 //   val io = IO(new Bundle {
 //     val vecA = Input(UInt((k * 8).W))   // 输入向量 A，宽度为 k*8 的 UInt 类型
@@ -61,6 +63,21 @@ class DPA extends MMAUFormat {
   // 输出点积结果
   io.eleC := regAcc
 
+}
+
+class DPAFP8 extends Module {
+  val io = IO(new Bundle {
+    val vecA = Input(Vec(8, UInt(8.W)))
+    val vecB = Input(Vec(8, UInt(8.W)))
+    val muxCtrlSum = Input(Bool())
+    val eleC = Output(SInt(FixedPoint.SHIFTED_LENGTH.W))
+  })
+
+  val fpu = Module(new Fpu())
+  fpu.io.a := io.vecA
+  fpu.io.b := io.vecB
+  fpu.io.clear := io.muxCtrlSum
+  io.eleC := fpu.io.out
 }
 
 
