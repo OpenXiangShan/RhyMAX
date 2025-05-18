@@ -22,7 +22,7 @@ class FSM_MLU_Test extends AnyFreeSpec with Matchers {
         dut.clock.step(1)
         dut.io.sigStart.poke(false.B)
 
-        while(!dut.io.sigDone.peek().litToBoolean){
+        while(!dut.io.sigReqDone.peek().litToBoolean){
             dut.clock.step(1)
         }
     }

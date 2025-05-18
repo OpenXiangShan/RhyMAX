@@ -148,6 +148,7 @@ class IssueMMAU_Excute_IO extends Bundle{//连接ExcuteHandler
 class Cacheline_Read_IO extends Bundle{
   val addr = Output(UInt(Consts.L2_ADDR_LEN.W))
   val id = Output(UInt(Consts.L2_ID_LEN.W))
+  val valid = Output(Bool())  //指示当前产生的读请求是否有意义
 }
 
 class Cacheline_ReadBack_IO extends Bundle{
@@ -157,12 +158,13 @@ class Cacheline_ReadBack_IO extends Bundle{
 }
 
 class FSM_MLU_IO extends Bundle{  //连接下一级
-  val Cacheline_Read_io = Vec(8 , new Cacheline_Read_IO)
+  val Cacheline_Read_io = Vec(8 , new Cacheline_Read_IO)  //对应8条cacheline
   val md = Output(UInt(Consts.All_ADDR_LEN.W))
+  // val valid = Output(Bool())  //指示当前产生的信号是否有意义
   val sigDone = Input(Bool())
 }
 
-class MLU_L2_IO extends Bundle{
+class MLU_L2_IO extends Bundle{ //MLU访问L2
   val Cacheline_Read_io = Vec(8 , new Cacheline_Read_IO)
   val Cacheline_ReadBack_io = Vec(8 , new Cacheline_ReadBack_IO)
 }
@@ -171,9 +173,10 @@ class MLU_L2_IO extends Bundle{
 
 class IssueMLU_Excute_IO extends Bundle{//连接ExcuteHandler
   val sigStart = Input(Bool())    //启动信号
+  val is_mlbe8 = Input(Bool())
   // val is_shaked = Input(Bool()) //是否握手成功
-  val rs1 = Input(UInt(Consts.rs1_LEN.W))  //初始值
-  val rs2 = Input(UInt(Consts.rs2_LEN.W))
+  val rs1 = Input(UInt(Consts.rs1_LEN.W))  //baseaddr
+  val rs2 = Input(UInt(Consts.rs2_LEN.W))   //stride
   val in_md = Input(UInt(Consts.All_ADDR_LEN.W))
   val mtilem = Input(UInt(log2Ceil(Consts.tileM+1).W))    //用户配置m维度长度
   val mtilen = Input(UInt(log2Ceil(Consts.tileN+1).W))    //用户配置n维度长度

@@ -7,7 +7,33 @@ import common._
 import MMAU._
 
 
-// //用于处理Tile各维度相关参数
+//用于处理MLU Tile各维度相关参数
+class TileHandler_MLU extends Module {
+  val io = IO(new Bundle {
+    val is_mlbe8 = Input(Bool())
+    val mtileConfig_io = new mtileConfig_IO
+    val TileHandler_MLU_io = new TileHandler_MLU_IO
+  })
+
+  // 默认输出为 0
+  val nRow = WireDefault(0.U(Consts.nRow_LEN.W))
+  val nCol = WireDefault(0.U(Consts.nCol_LEN.W))
+
+  when(io.is_mlbe8) {
+    // ceil(x / 8) == (x + 7) >> 3
+    nRow := (io.mtileConfig_io.mtilen + 7.U) >> 3
+    // ceil(x / 64) == (x + 63) >> 6
+    nCol := (io.mtileConfig_io.mtilek + 63.U) >> 6
+  }
+
+  io.TileHandler_MLU_io.nRow := nRow
+  io.TileHandler_MLU_io.nCol := nCol
+}
+
+
+
+
+//用于处理MMAU Tile各维度相关参数
 class TileHandler_MMAU extends MMAUFormat {
   val io = IO(new Bundle {
     val mtileConfig_io = new mtileConfig_IO   //用户配置尺寸

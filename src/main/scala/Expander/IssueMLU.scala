@@ -7,12 +7,65 @@ import common._
 import MMAU._
 
 
-// class IssueMLU extends Module{
-//   val io = IO(new Bundle {
-//     val FSM_MLU_io = new FSM_MLU_IO
-//     val IssueMMAU_Excute_io = new IssueMMAU_Excute_IO
-//   })
+class IssueMLU extends Module{
+  val io = IO(new Bundle {
+    val FSM_MLU_io = new FSM_MLU_IO
+    val IssueMLU_Excute_io = new IssueMLU_Excute_IO
 
-  
+    val sigReqDone = Output(Bool())     //为true时，读请求相关信号不再产生，用于调试
+  })
 
-// }
+  val subTileHandler = Module(new TileHandler_MLU)
+  val subFSM = Module(new FSM_MLU)
+
+  //存该条指令有关信息
+  val reg_mtilem = RegInit(0.U(log2Ceil(Consts.tileM+1).W))
+  val reg_mtilen = RegInit(0.U(log2Ceil(Consts.tileN+1).W))
+  val reg_mtilek = RegInit(0.U(log2Ceil(Consts.tileK+1).W))
+  val reg_rs1 = RegInit(0.U(Consts.rs1_LEN.W))
+  val reg_rs2 = RegInit(0.U(Consts.rs2_LEN.W))
+  val reg_md = RegInit(0.U(Consts.All_ADDR_LEN.W))
+
+  when(io.IssueMLU_Excute_io.sigStart){//接到strat信号，更新info
+    reg_mtilem := io.IssueMLU_Excute_io.mtilem
+    reg_mtilen := io.IssueMLU_Excute_io.mtilen
+    reg_mtilek := io.IssueMLU_Excute_io.mtilek
+    reg_rs1 := io.IssueMLU_Excute_io.rs1
+    reg_rs2 := io.IssueMLU_Excute_io.rs2
+    reg_md := io.IssueMLU_Excute_io.in_md
+  }.otherwise{
+    reg_mtilem := reg_mtilem
+    reg_mtilen := reg_mtilen
+    reg_mtilek := reg_mtilek
+    reg_rs1 := reg_rs1
+    reg_rs2 := reg_rs2
+    reg_md := reg_md
+  }
+
+  /*    between Top and TileHandler    */
+  subTileHandler.io.is_mlbe8 := io.IssueMLU_Excute_io.is_mlbe8
+
+  /*    between Top and regInfo    */
+  //done above
+  io.IssueMLU_Excute_io.out_md := reg_md
+
+  /*    between Top and FSM    */
+  subFSM.io.sigStart := io.IssueMLU_Excute_io.sigStart
+  subFSM.io.FSM_MLU_io <> io.FSM_MLU_io
+  io.IssueMLU_Excute_io.sigDone := subFSM.io.sigDone
+  io.sigReqDone := subFSM.io.sigReqDone //for debug
+
+  /*    between regInfo and FSM    */
+  subFSM.io.rs1 := reg_rs1
+  subFSM.io.rs2 := reg_rs2
+  subFSM.io.md := reg_md
+
+  /*    between regInfo and TileHandler    */
+  subTileHandler.io.mtileConfig_io.mtilem := reg_mtilem
+  subTileHandler.io.mtileConfig_io.mtilen := reg_mtilen
+  subTileHandler.io.mtileConfig_io.mtilek := reg_mtilek
+
+  /*    between FSM and TileHandler    */
+  subFSM.io.TileHandler_MLU_io <> subTileHandler.io.TileHandler_MLU_io
+
+}
