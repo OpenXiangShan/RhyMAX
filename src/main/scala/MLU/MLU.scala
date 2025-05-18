@@ -20,11 +20,17 @@ class MLU extends Module{
     io.FSM_MLU_io.Cacheline_Read_io <> io.MLU_L2_io.Cacheline_Read_io
 
     /*    写RF    */
-    val wireSplit = Vec(8 , Vec(8 , Wire(UInt((64 + 5).W))))    //接MultiInputMux，每个cacheline有8路
+    val wireSplit = Wire(Vec(8, Vec(8, UInt((64 + 5).W))))  //接MultiInputMux，每个cacheline有8路
     val subMultiInputBuffer = Seq.fill(8)(Module(new MultiInputBuffer(numWay = 8, width = 64 + 5 , depth = 3)))    //8个cacheline , 每个cacheline拆成8路，每路是8B的向量，外加一个5bit的id
 
     io.RegFileAllWrite_io.addr := io.FSM_MLU_io.md    //选择写入的寄存器
     io.RegFileAllWrite_io.act := true.B      //端口始终激活，但是写数据时valid不一定生效
+
+    for(i <- 0 until Consts.numAllBank){    //写端口赋缺省值
+        io.RegFileAllWrite_io.w(i).req.bits.setIdx := 0.U
+        io.RegFileAllWrite_io.w(i).req.bits.data.head := 0.U
+        io.RegFileAllWrite_io.w(i).req.valid := false.B
+    }
     
     
     for(y <- 0 until 8){//为每个Cacheline分时缓冲
@@ -44,17 +50,20 @@ class MLU extends Module{
 
         // 出，1路
 
-        subMultiInputBuffer(y).io.out.ready := true.B  //永远都想读
+        subMultiInputBuffer(y).io.out.ready := true.B  //始终希望读
         val readvalid = subMultiInputBuffer(y).io.out.valid    //判断读出的数据是否有意义
         val output = subMultiInputBuffer(y).io.out.bits //读数据
         val data = output(68 , 5)   //数据段
         val bankId = output(1 , 0) * 8.U + y.U  //bank号
         val index = Mux(output(2) === 0.U , output(2) * 4.U + output(4,3) * 8.U , output(2) * 4.U + output(4,3) * 8.U + 28.U)  //bank内地址
 
-        //!!!这样写会有问题
+        //!!!这样写可能会有问题，用bankId去寻址，不知道综合出来是什么东西
         io.RegFileAllWrite_io.w(bankId).req.bits.setIdx := index
         io.RegFileAllWrite_io.w(bankId).req.bits.data.head := data
         io.RegFileAllWrite_io.w(bankId).req.valid := readvalid
     }
+
+    /*  sigDone   */
+    io.FSM_MLU_io.sigDone := false.B
 
 }

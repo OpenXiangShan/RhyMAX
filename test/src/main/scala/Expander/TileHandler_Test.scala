@@ -12,10 +12,33 @@ import common._
 
 
 
+class TileHandler_MLU_Test extends AnyFreeSpec with Matchers {
 
-class TileHandlerTest extends AnyFreeSpec with Matchers {
+  "TileHandler_MLU should PASS" in {
+    simulate(new TileHandler_MLU) { dut =>
+    
+      // 输入用户配置尺寸
+      dut.io.is_mlbe8.poke(true.B)
+      dut.io.mtileConfig_io.mtilem.poke(1.U)
+      dut.io.mtileConfig_io.mtilen.poke(0.U)
+      dut.io.mtileConfig_io.mtilek.poke(1.U)
 
-  "TileHandler should PASS" in {
+      // 打印输出，不前进时钟(纯组合逻辑)
+      dut.clock.step(1)
+
+      println(s"nRow  = ${dut.io.TileHandler_MLU_io.nRow.peek().litValue}")
+      println(s"nCol  = ${dut.io.TileHandler_MLU_io.nCol.peek().litValue}")
+      
+    }
+  }
+}
+
+
+
+
+class TileHandler_MMAU_Test extends AnyFreeSpec with Matchers {
+
+  "TileHandler_MMAU should PASS" in {
     simulate(new TileHandler_MMAU) { dut =>
     
       // 输入用户配置尺寸
