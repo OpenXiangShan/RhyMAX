@@ -1,6 +1,6 @@
 # AME  
 
-This is a TPU.
+This is to support FP8.
 
 ## Quick start
 
