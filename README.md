@@ -1,6 +1,6 @@
-# AME  
+# AME
 
-This is a TPU.
+This is used to accelerate matrix operations.
 
 ## Quick start
 
@@ -20,7 +20,7 @@ make sv SV_NAME=xxx_sv  #specific target
 
 ```
 make testAll  #run all tests
-make testOnly  #default is MMAU.MMAUTestExpect
+make testOnly  #default is AME.AMETest, consider it a smoke test
 make testOnly TEST_NAME=packageName.testName  #specific target
 ```
 
