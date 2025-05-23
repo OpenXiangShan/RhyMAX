@@ -145,19 +145,19 @@ class IssueMMAU_Excute_IO extends Bundle{//连接ExcuteHandler
 
 /*    MLU   */
 
-class Cacheline_Read_IO extends Bundle{
+class Cacheline_Read_IO extends Bundle{ //向L2发送读请求（单条cacheline）
   val addr = Output(UInt(Consts.L2_ADDR_LEN.W))
   val id = Output(UInt(Consts.L2_ID_LEN.W))
   val valid = Output(Bool())  //指示当前产生的读请求是否有意义
 }
 
-class Cacheline_ReadBack_IO extends Bundle{
+class Cacheline_ReadBack_IO extends Bundle{ //从L2读回的数据（单条cacheline）
   val data = Input(UInt((64 * 8).W))  //64B
   val id = Input(UInt(Consts.L2_ID_LEN.W))
   val valid = Input(Bool()) //标志L2过来的数据是否有效
 }
 
-class FSM_MLU_IO extends Bundle{  //连接下一级
+class FSM_MLU_IO extends Bundle{  //MLU的FSM，连接下层MLU接口
   val Cacheline_Read_io = Vec(8 , new Cacheline_Read_IO)  //对应8条cacheline
   val md = Output(UInt(Consts.All_ADDR_LEN.W))
   // val valid = Output(Bool())  //指示当前产生的信号是否有意义

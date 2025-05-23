@@ -10,7 +10,7 @@ import MMAU._
 
 
 
-object connectPort{ //用于将MMAU的有关信号连接到RegFile的读写端口
+object connectPort{ //用于将MMAU或MLU的有关信号连接到RegFile的读写端口
   
   def toTrReadPort(
     regFilePort: RegFileTrRead_IO,
@@ -61,4 +61,22 @@ object connectPort{ //用于将MMAU的有关信号连接到RegFile的读写端�
       regFilePort.w(i).req.bits.data.head := mmauData(i)
     }
   }
+
+  def toAllWritePort(
+  regFilePort: RegFileAllWrite_IO,
+  addr: UInt,
+  actPort: Bool,
+  mluAddr: Vec[UInt],
+  mluData: Vec[UInt],
+  enable: Vec[Bool]
+): Unit = {
+  regFilePort.addr := addr
+  regFilePort.act := actPort
+  for (i <- 0 until mluAddr.length) {
+    regFilePort.w(i).req.bits.setIdx := mluAddr(i)
+    regFilePort.w(i).req.valid := enable(i)
+    regFilePort.w(i).req.bits.data.head := mluData(i)
+  }
+}
+
 }

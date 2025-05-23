@@ -9,6 +9,7 @@ import RegFile._
 import MMAU._
 import Expander._
 import ScoreBoard._
+import MLU._
 
 
 
@@ -24,10 +25,12 @@ class AME extends Module {
     // val Operands_io = new Operands_IO
     // val InsType_io = new InsType_IO
     // val mtileConfig_io = new mtileConfig_IO
-    val Uop_io = new Uop_IO
+    val Uop_io = new Uop_IO //译码后信号
 
     val writeAll = new RegFileAllWrite_IO  //通用读端口
     val readAll = new RegFileAllRead_IO  //通用写端口
+
+    val MLU_L2_io = new MLU_L2_IO   //访问L2
 
 
     val sigDone = Output(Bool())    // for debug
@@ -37,6 +40,7 @@ class AME extends Module {
   val subRegFile = Module(new RegFile)
   val subExpander = Module(new Expander)
   val subScoreBoard = Module(new ScoreBoard)
+  val subMLU = Module(new MLU)
 
   /*  for debug   */
   io.sigDone := subExpander.io.sigDone
@@ -44,17 +48,16 @@ class AME extends Module {
   /*  between Top and MMAU  */
   // nothing
 
+  /*  between Top and MLU  */
+  io.MLU_L2_io <> subMLU.io.MLU_L2_io
+
   /*  between Top and RegFile  */
   subRegFile.io := DontCare
 
-  io.writeAll <> subRegFile.io.writeAll(0)
-  io.readAll <> subRegFile.io.readAll(0)
+  io.writeAll <> subRegFile.io.writeAll(1)
+  io.readAll <> subRegFile.io.readAll(1)
 
   /*  between Top and Expander  */
-  // io.ShakeHands_io <> subExpander.io.ShakeHands_io
-  // io.Operands_io <> subExpander.io.Operands_io
-  // io.InsType_io <> subExpander.io.InsType_io
-  // io.mtileConfig_io <> subExpander.io.mtileConfig_io
   io.Uop_io <> subExpander.io.Uop_io
 
   /*  between Top and ScoreBoard  */
@@ -104,6 +107,13 @@ class AME extends Module {
   /*  between MMAU and ScoreBoard  */
   // nothing
 
+  /*  between MMAU and MLU  */
+  // nothing
+
+  /*  between RegFile and MLU  */
+  subRegFile.io.writeAll(0) <> subMLU.io.RegFileAllWrite_io
+
+
   /*  between RegFile and Expander  */
   // nothing
 
@@ -113,6 +123,11 @@ class AME extends Module {
   /*  between Expander and ScoreBoard  */
   subExpander.io.ScoreboardVisit_io <> subScoreBoard.io.ScoreboardVisit_io
 
+  /*  between Expander and MLU  */
+  subMLU.io.FSM_MLU_io <> subExpander.io.FSM_MLU_io
+
+  /*  between ScoreBoard and MLU  */
+  //nothing
 
 }
 

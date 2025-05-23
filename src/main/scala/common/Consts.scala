@@ -86,8 +86,8 @@ object Consts {
   val useBitmaskAll: Boolean = false
 
   val numAllBank: Int = scala.math.max(numAccBank , numTrBank)
-  val numAllReadPort: Int = 1
-  val numAllWritePort: Int = 1
+  val numAllReadPort: Int = 2
+  val numAllWritePort: Int = 2
 
   val All_INDEX_LEN   = log2Ceil(setAll)
   val All_ADDR_LEN     = log2Ceil(numAcc + numTr) //表示所有寄存器标号所需位宽（0～7）

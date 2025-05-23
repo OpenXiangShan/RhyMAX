@@ -9,8 +9,8 @@ import MMAU._
 
 class IssueMLU extends Module{
   val io = IO(new Bundle {
-    val FSM_MLU_io = new FSM_MLU_IO
-    val IssueMLU_Excute_io = new IssueMLU_Excute_IO
+    val FSM_MLU_io = new FSM_MLU_IO //连接下层MLU
+    val IssueMLU_Excute_io = new IssueMLU_Excute_IO //连接ExcuteHandler
 
     val sigReqDone = Output(Bool())     //为true时，读请求相关信号不再产生，用于调试
   })

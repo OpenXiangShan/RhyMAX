@@ -24,7 +24,7 @@ class MLU extends Module{
     val subMultiInputBuffer = Seq.fill(8)(Module(new MultiInputBuffer(numWay = 8, width = 64 + 5 , depth = 3)))    //8个cacheline , 每个cacheline拆成8路，每路是8B的向量，外加一个5bit的id
 
     io.RegFileAllWrite_io.addr := io.FSM_MLU_io.md    //选择写入的寄存器
-    io.RegFileAllWrite_io.act := true.B      //端口始终激活，但是写数据时valid不一定生效
+    io.RegFileAllWrite_io.act := true.B      // !!!端口不可以始终激活，会有问题，暂时先这么写
 
     for(i <- 0 until Consts.numAllBank){    //写端口赋缺省值
         io.RegFileAllWrite_io.w(i).req.bits.setIdx := 0.U

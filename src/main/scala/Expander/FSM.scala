@@ -237,12 +237,12 @@ class FSM_MLU extends Module{ //MLU状态机
   }
   
 
-  /*    debug   */
-  printf(p"regRow = $regRow , regCol = $regCol , sigStart = ${io.sigStart} , sigReqDone = ${io.sigReqDone} , stride = ${stride} , valid = ${regState} \n")
-  for(i <- 0 until 8){
-    printf(p"$i : addr = ${io.FSM_MLU_io.Cacheline_Read_io(i).addr} , id = ${io.FSM_MLU_io.Cacheline_Read_io(i).id}\n")
-  }
-  printf(p"\n\n")
+  // /*    debug   */
+  // printf(p"regRow = $regRow , regCol = $regCol , sigStart = ${io.sigStart} , sigReqDone = ${io.sigReqDone} , stride = ${stride} , valid = ${regState} \n")
+  // for(i <- 0 until 8){
+  //   printf(p"$i : addr = ${io.FSM_MLU_io.Cacheline_Read_io(i).addr} , id = ${io.FSM_MLU_io.Cacheline_Read_io(i).id}\n")
+  // }
+  // printf(p"\n\n")
 
 }
 
