@@ -2,6 +2,8 @@
 
 This is used to accelerate matrix operations.
 
+Branch "LS" is for adding LS instructions.
+
 ## Quick start
 
 ```
