@@ -27,7 +27,8 @@ class Expander extends Module{
     val subIssueMLU = Module(new IssueMLU)
 
     /*  for debug   */
-    io.sigDone := subIssueMMAU.io.IssueMMAU_Excute_io.sigDone
+    // io.sigDone := subIssueMMAU.io.IssueMMAU_Excute_io.sigDone
+    io.sigDone := subIssueMLU.io.IssueMLU_Excute_io.sigDone
 
     /*  between Top and ExcuteHandler */
     io.ScoreboardVisit_io <> subExcuteHandler.io.ScoreboardVisit_io

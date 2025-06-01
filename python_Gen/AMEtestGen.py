@@ -99,7 +99,7 @@ class MatrixGenerator:
 
     def save_to_file(self):
         """保存为完整的 Scala 文件"""
-        output_dir = "../test/src/main/scala/AME"
+        output_dir = "../test/src/main/scala/AME/TestData"
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, "AME_TestData.scala")
 

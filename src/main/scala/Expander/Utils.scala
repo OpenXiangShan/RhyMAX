@@ -158,10 +158,12 @@ class Cacheline_ReadBack_IO extends Bundle{ //从L2读回的数据（单条cache
 }
 
 class FSM_MLU_IO extends Bundle{  //MLU的FSM，连接下层MLU接口
+  // val sigDone = Input(Bool()) //由MLU告知上级Load是否完成
+  val sigLineDone = Input(Vec(8, Bool()))  //每条Cacheline对应的写入RF，每成功写入一次数据，则上报一次
+
   val Cacheline_Read_io = Vec(8 , new Cacheline_Read_IO)  //对应8条cacheline
-  val md = Output(UInt(Consts.All_ADDR_LEN.W))
-  // val valid = Output(Bool())  //指示当前产生的信号是否有意义
-  val sigDone = Input(Bool())
+  val md = Output(UInt(Consts.All_ADDR_LEN.W))  //告知MLU该写入哪个寄存器
+  val sigPortState = Output(Bool()) //告知MLU是否处于工作状态，用于Port的激活或注销
 }
 
 class MLU_L2_IO extends Bundle{ //MLU访问L2

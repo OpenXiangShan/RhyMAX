@@ -32,7 +32,7 @@ class IssueMLU_Test extends AnyFreeSpec with Matchers {
 
     //   dut.clock.step(5)
 
-      while(!dut.io.sigReqDone.peek().litToBoolean){
+      while(!dut.io.IssueMLU_Excute_io.sigDone.peek().litToBoolean){
         dut.clock.step(1)
         // for(i <- 0 until 8){
         //     println(s"cacheline $i : addr = ${dut.io.FSM_MLU_io.Cacheline_Read_io(i).addr.peek().litValue} , id = ${dut.io.FSM_MLU_io.Cacheline_Read_io(i).id.peek().litValue}")

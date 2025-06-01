@@ -185,8 +185,8 @@ class FSM_MLU extends Module{ //MLU状态机
     val TileHandler_MLU_io = Flipped(new TileHandler_MLU_IO)  //padding后用于设置状态机
     val FSM_MLU_io = new FSM_MLU_IO //连接下层MLU
 
-    val sigReqDone = Output(Bool()) //读请求信号不再产生，不同于数据全部搬运完 
-    val sigDone = Output(Bool()) //数据全部搬运完成，该信号由下级MLU产生
+    // val sigReqDone = Output(Bool()) //读请求信号不再产生，不同于数据全部搬运完 
+    val sigDone = Output(Bool()) //Load完成的信号，拉高再拉低
   })
 
   /*  TileHandler_MLU_io  */
@@ -198,7 +198,7 @@ class FSM_MLU extends Module{ //MLU状态机
   val stride = io.rs2
 
   //标记状态
-  val regRow = RegInit(0.U(Consts.nRow_LEN.W))
+  val regRow = RegInit(0.U(Consts.nRow_LEN.W))  //因为和nRow那里共用nRow_LEN，所以实际上多一位是浪费的
   val regCol = RegInit(0.U(Consts.nCol_LEN.W))
 
 
@@ -206,39 +206,71 @@ class FSM_MLU extends Module{ //MLU状态机
               Mux(regRow === nRow - 1.U , 0.U , regRow + 1.U))
 
   regCol := Mux(io.sigStart , 0.U , 
-              Mux(regRow === nRow - 1.U , regCol + 1.U , regCol))
+              Mux(regCol === nCol - 1.U && regRow === nRow - 1.U, 0.U , 
+                Mux(regRow === nRow - 1.U , regCol + 1.U , regCol)))
 
   /*  FSM_MLU_io  */
   for(y <- 0 until 8){
-    io.FSM_MLU_io.Cacheline_Read_io(y).addr := baseAddr + (regRow * 8.U + y.U) * stride + regCol
-    io.FSM_MLU_io.Cacheline_Read_io(y).id := Cat(regCol , regRow)
+    io.FSM_MLU_io.Cacheline_Read_io(y).addr := baseAddr + (regRow * 8.U + y.U) * stride + regCol * 64.U
+    io.FSM_MLU_io.Cacheline_Read_io(y).id := Cat(regCol(1 , 0) , regRow(2 , 0))
   }
 
   io.FSM_MLU_io.md := io.md
 
-  /*  sigReqDone   */
+  /*  sigReqDone：L2读请求信号不再产生   */
   val wireReqDone = Mux(regRow === nRow - 1.U && regCol === nCol - 1.U , true.B , false.B)  //暂时先这么处理把
-  io.sigReqDone := wireReqDone
+  // io.sigReqDone := wireReqDone
 
   /*  sigDone  */
-  io.sigDone := io.FSM_MLU_io.sigDone
+  val wireDone = Wire(Bool())
+  val regCntDone = RegInit(VecInit(Seq.fill(8)(0.U(log2Ceil(8 * 4 * 8 + 1).W)))) //对应8条sigLineDone，用于计数，从0开始，计到nRow * nCol * 8 则满
+
+  for(i <- 0 until 8){
+    when(io.sigStart && wireDone){  //启动时归0；Load结束后也归零，这样Done信号就不会一直拉高
+      regCntDone(i) := 0.U
+    }.elsewhen(io.FSM_MLU_io.sigLineDone(i)){ //由MLU告知成功写入一条数据，则+1
+      regCntDone(i) := regCntDone(i) + 1.U
+    }.otherwise{  //其他情况不变
+      regCntDone(i) := regCntDone(i)
+    }
+
+// //debug
+// printf(p"regCntDone($i) = ${regCntDone(i)} , io.FSM_MLU_io.sigLineDone($i) = ${io.FSM_MLU_io.sigLineDone(i)}\n")  
+  } 
+// printf(p"nRow = $nRow , nCol = $nCol\n") 
+
+  wireDone := regCntDone.map(_ === (nRow * nCol * 8.U)).reduce(_ && _)  //所有regCntDone均为nRow * nCol * 8，则Load结束
+  io.sigDone := wireDone
+  // io.sigDone := io.FSM_MLU_io.sigDone //由MLU告知是否结束，并逐级向上传递
+  // io.sigDone := wireReqDone //!!!暂时等同于sigReqDone
 
   /*  valid   */
-  val regState = RegInit(false.B)  //指示是否为工作状态
+  val regL2State = RegInit(false.B)  //指示L2是否为工作状态，影响访问L2信号valid是否有效
+
   when(io.sigStart){
-    regState := true.B
+    regL2State := true.B
   }.elsewhen(wireReqDone){
-    regState := false.B
+    regL2State := false.B
   }
 
-  // io.FSM_MLU_io.valid := regState  //把valid放到每条cacheline里
   for(y <- 0 until 8){
-    io.FSM_MLU_io.Cacheline_Read_io(y).valid := regState
+    io.FSM_MLU_io.Cacheline_Read_io(y).valid := regL2State
   }
+
+  /*  Port State  */
+  val regPortState = RegInit(false.B)  //指示L2是否为工作状态，影响访问L2信号valid是否有效
+
+  when(io.sigStart){//sigStart信号开始，直到Load指令结束
+    regPortState := true.B
+  }.elsewhen(wireDone){
+    regPortState := false.B
+  }
+
+  io.FSM_MLU_io.sigPortState := regPortState  //告知MLU是否处于工作状态，用于Port的激活或注销
   
 
   // /*    debug   */
-  // printf(p"regRow = $regRow , regCol = $regCol , sigStart = ${io.sigStart} , sigReqDone = ${io.sigReqDone} , stride = ${stride} , valid = ${regState} \n")
+  // printf(p"regRow = $regRow , regCol = $regCol , sigStart = ${io.sigStart} , sigReqDone = ${io.sigReqDone} , stride = ${stride} , valid = ${regL2State} \n")
   // for(i <- 0 until 8){
   //   printf(p"$i : addr = ${io.FSM_MLU_io.Cacheline_Read_io(i).addr} , id = ${io.FSM_MLU_io.Cacheline_Read_io(i).id}\n")
   // }
