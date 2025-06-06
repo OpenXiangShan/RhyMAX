@@ -8,6 +8,7 @@ import org.scalatest.matchers.must.Matchers
 import scala.util.Random
 
 import common._
+import L2._
 
 
 
@@ -222,4 +223,91 @@ object apply {
   //   dut.io.sigStart.poke(false.B)
   // }
 
+
+
+
+  /*  使用IssueQueen push   */
+  //push进IssueQueen,同时step 1
+  def IssueQueen_Push_Step(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool): Unit = {  
+    // dut.io.sigStart.poke(true.B)  //启动信号
+
+    // 输入用户配置尺寸
+    dut.io.Uop_io.mtileConfig_io.mtilem.poke(mtilem.U)
+    dut.io.Uop_io.mtileConfig_io.mtilen.poke(mtilen.U)
+    dut.io.Uop_io.mtileConfig_io.mtilek.poke(mtilek.U)
+
+    // 确定操作数矩阵
+    dut.io.Uop_io.Operands_io.ms1.poke(ms1.U)
+    dut.io.Uop_io.Operands_io.ms2.poke(ms2.U)
+    dut.io.Uop_io.Operands_io.md.poke(md.U)
+    dut.io.Uop_io.Operands_io.rs1.poke(rs1.U)
+    dut.io.Uop_io.Operands_io.rs2.poke(rs2.U)
+
+    //valid信号
+    dut.io.Uop_io.ShakeHands_io.valid.poke(valid)
+
+    //InsType_io信号
+    dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
+    dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
+
+    dut.clock.step(1) //前进一个时钟,IssueQueen更新
+
+    // dut.io.sigStart.poke(false.B)
+  }
+
+  //push进IssueQueen,不step 1
+  def IssueQueen_Push_noStep(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool): Unit = {  
+    
+    // 输入用户配置尺寸
+    dut.io.Uop_io.mtileConfig_io.mtilem.poke(mtilem.U)
+    dut.io.Uop_io.mtileConfig_io.mtilen.poke(mtilen.U)
+    dut.io.Uop_io.mtileConfig_io.mtilek.poke(mtilek.U)
+
+    // 确定操作数矩阵
+    dut.io.Uop_io.Operands_io.ms1.poke(ms1.U)
+    dut.io.Uop_io.Operands_io.ms2.poke(ms2.U)
+    dut.io.Uop_io.Operands_io.md.poke(md.U)
+    dut.io.Uop_io.Operands_io.rs1.poke(rs1.U)
+    dut.io.Uop_io.Operands_io.rs2.poke(rs2.U)
+
+    //valid信号
+    dut.io.Uop_io.ShakeHands_io.valid.poke(valid)
+
+    //InsType_io信号
+    dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
+    dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
+
+  }
+
+
+  /*  MLU   */
+  //手动从L2读进AME，同时前进一个时钟
+  def load_ins_step(dut: AME): Unit = {
+    for(i <- 0 until 8){//8条cacheline
+          if(dut.io.MLU_L2_io.Cacheline_Read_io(i).valid.peek().litToBoolean){//对L2读请求有意义
+            val addr_req = dut.io.MLU_L2_io.Cacheline_Read_io(i).addr.peek().litValue.toInt
+            val id_req = dut.io.MLU_L2_io.Cacheline_Read_io(i).id.peek().litValue.toInt
+
+println(s"addr_req = ${addr_req} , id_req = ${id_req}")
+
+            val (readData, id) = L2Sim.readLine(addr_req, id_req)
+println(f"readData = 0x${readData.litValue}%0128X, id = $id")
+            dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).data.poke(readData)
+            dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).id.poke(id)
+            dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).valid.poke(true.B)
+          }else{
+            dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).valid.poke(false.B)
+          }
+        }
+        
+        dut.clock.step(1)
+
+
+        for(i <- 0 until 8){  //最后validq确保false,防止误读L2数据
+        dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).valid.poke(false.B)
+      }
+  }
 }
+
+
+

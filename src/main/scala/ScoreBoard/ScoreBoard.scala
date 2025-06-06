@@ -13,8 +13,8 @@ class ScoreBoard extends Module{
     val ScoreboardVisit_io = Flipped(new ScoreboardVisit_IO)
   })
 
-  val regSB_RF = RegInit(0.U(8.W))
-  val regSB_Unit = RegInit(0.U(5.W))  //0:MLU  1:MSU  2:MMAU  3:MISC  4:EWU
+  val regSB_RF = RegInit(0.U(Consts.RF_LEN.W))
+  val regSB_Unit = RegInit(0.U(Consts.Unit_LEN.W))  //0:MLU  1:MSU  2:MMAU  3:MISC  4:EWU
 
   //read
   io.ScoreboardVisit_io.read_RF := regSB_RF

@@ -52,12 +52,12 @@ class Uop_IO extends Bundle{  //微操作序列
 /*    计分板    */
 
 class ScoreboardVisit_IO extends Bundle{//与计分板交互
-  val read_RF = Input(UInt(8.W))    //读取RF资源使用情况
-  val read_Unit = Input(UInt(4.W))  //读取功能单元使用情况
-  val writeMaskAlloc_RF = Output(UInt(8.W))   //分配RF，掩码形式  
-  val writeMaskAlloc_Unit = Output(UInt(4.W)) //分配功能单元，掩码形式
-  val writeMaskFree_RF = Output(UInt(8.W))   //释放RF，掩码形式  
-  val writeMaskFree_Unit = Output(UInt(4.W)) //释放功能单元，掩码形式
+  val read_RF = Input(UInt(Consts.RF_LEN.W))    //读取RF资源使用情况
+  val read_Unit = Input(UInt(Consts.Unit_LEN.W))  //读取功能单元使用情况
+  val writeMaskAlloc_RF = Output(UInt(Consts.RF_LEN.W))   //分配RF，掩码形式  
+  val writeMaskAlloc_Unit = Output(UInt(Consts.Unit_LEN.W)) //分配功能单元，掩码形式
+  val writeMaskFree_RF = Output(UInt(Consts.RF_LEN.W))   //释放RF，掩码形式  
+  val writeMaskFree_Unit = Output(UInt(Consts.Unit_LEN.W)) //释放功能单元，掩码形式
 }
 
 

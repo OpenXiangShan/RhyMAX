@@ -23,25 +23,43 @@ class IssueMLU extends Module{
   val reg_rs1 = RegInit(0.U(Consts.rs1_LEN.W))
   val reg_rs2 = RegInit(0.U(Consts.rs2_LEN.W))
   val reg_md = RegInit(0.U(Consts.All_ADDR_LEN.W))
+  val reg_is_mlbe8 = RegInit(false.B)
 
-  when(io.IssueMLU_Excute_io.sigStart){//接到strat信号，更新info
+  when(io.IssueMLU_Excute_io.sigStart){//接到start信号，更新info
     reg_mtilem := io.IssueMLU_Excute_io.mtilem
     reg_mtilen := io.IssueMLU_Excute_io.mtilen
     reg_mtilek := io.IssueMLU_Excute_io.mtilek
     reg_rs1 := io.IssueMLU_Excute_io.rs1
     reg_rs2 := io.IssueMLU_Excute_io.rs2
     reg_md := io.IssueMLU_Excute_io.in_md
-  }.otherwise{
-    reg_mtilem := reg_mtilem
-    reg_mtilen := reg_mtilen
-    reg_mtilek := reg_mtilek
-    reg_rs1 := reg_rs1
-    reg_rs2 := reg_rs2
-    reg_md := reg_md
+    reg_is_mlbe8 := io.IssueMLU_Excute_io.is_mlbe8
   }
+  // .otherwise{
+  //   reg_mtilem := reg_mtilem
+  //   reg_mtilen := reg_mtilen
+  //   reg_mtilek := reg_mtilek
+  //   reg_rs1 := reg_rs1
+  //   reg_rs2 := reg_rs2
+  //   reg_md := reg_md
+      // reg_is_mlbe8 := reg_is_mlbe8
+  // }
+
+// debug
+// printf(p"[debug] MLU_sigStart = ${io.IssueMLU_Excute_io.sigStart}, " +
+//        p"mtilem=${io.IssueMLU_Excute_io.mtilem}, mtilen=${io.IssueMLU_Excute_io.mtilen}, " +
+//        p"mtilek=${io.IssueMLU_Excute_io.mtilek}, rs1=${io.IssueMLU_Excute_io.rs1}, " +
+//        p"rs2=${io.IssueMLU_Excute_io.rs2}, in_md=${io.IssueMLU_Excute_io.in_md}\n")
+
+
+printf(p"[debug] MLU_sigStart = ${io.IssueMLU_Excute_io.sigStart}, " +
+       p"mtilem=${reg_mtilem}, mtilen=${reg_mtilen}, " +
+       p"mtilek=${reg_mtilek}\n")
+
+
 
   /*    between Top and TileHandler    */
-  subTileHandler.io.is_mlbe8 := io.IssueMLU_Excute_io.is_mlbe8
+  // subTileHandler.io.is_mlbe8 := io.IssueMLU_Excute_io.is_mlbe8 //被你害惨了
+  subTileHandler.io.is_mlbe8 := reg_is_mlbe8
 
   /*    between Top and regInfo    */
   //done above

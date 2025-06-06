@@ -10,6 +10,7 @@ import MMAU._
 import Expander._
 import ScoreBoard._
 import MLU._
+import IssueQueen._
 
 
 
@@ -41,6 +42,7 @@ class AME extends Module {
   val subExpander = Module(new Expander)
   val subScoreBoard = Module(new ScoreBoard)
   val subMLU = Module(new MLU)
+  val subIssueQueen = Module(new IssueQueen)
 
   /*  for debug   */
   io.sigDone := subExpander.io.sigDone
@@ -58,10 +60,15 @@ class AME extends Module {
   io.readAll <> subRegFile.io.readAll(1)
 
   /*  between Top and Expander  */
-  io.Uop_io <> subExpander.io.Uop_io
+  // io.Uop_io <> subExpander.io.Uop_io //
 
   /*  between Top and ScoreBoard  */
   // nothing
+
+
+  /*  between Top and IssueQueen  */
+  io.Uop_io <> subIssueQueen.io.Uop_In_io
+
 
   /*  between MMAU and RegFile  */
     //read A(Tr0),using subRegFile.io.readTr(0)
@@ -125,6 +132,9 @@ class AME extends Module {
 
   /*  between Expander and MLU  */
   subMLU.io.FSM_MLU_io <> subExpander.io.FSM_MLU_io
+
+  /*  between Expander and IssueQueen  */
+  subIssueQueen.io.Uop_Out_io <> subExpander.io.Uop_io
 
   /*  between ScoreBoard and MLU  */
   //nothing

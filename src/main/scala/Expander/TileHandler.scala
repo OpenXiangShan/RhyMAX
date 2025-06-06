@@ -16,8 +16,14 @@ class TileHandler_MLU extends Module {
   })
 
   // 默认输出为 0
-  val nRow = WireDefault(0.U(Consts.nRow_LEN.W))
-  val nCol = WireDefault(0.U(Consts.nCol_LEN.W))
+  // val nRow = WireDefault(0.U(Consts.nRow_LEN.W))
+  // val nCol = WireDefault(0.U(Consts.nCol_LEN.W))
+
+  val nRow = Wire(UInt(Consts.nRow_LEN.W))
+  val nCol = Wire(UInt(Consts.nCol_LEN.W))
+
+  nRow := 0.U
+  nCol := 0.U
 
   when(io.is_mlbe8) {
     // ceil(x / 8) == (x + 7) >> 3

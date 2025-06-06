@@ -16,6 +16,51 @@ import MMAU._
 import L2._
 
 
+//AME完整测试，load A ,load B, mma指令混合,使用IssueQueen
+class AMETest_allIns_usingQueen extends AnyFreeSpec with Matchers {
+
+  "AMETest_allIns_usingQueen should PASS" in {
+    simulate(new AME) { dut =>
+
+      L2Sim.loadDataFrom(L2TestData.L2_Data, 0)//初始化L2
+
+      
+      
+      dut.clock.step(1) //等待上电稳定
+
+
+      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8)
+
+
+      AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 0, 0, 256, true.B, false.B, true.B) //load A
+      AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B) //load B
+      AME.apply.load_ins_step(dut) 
+
+      AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 1, 4, 0, 256, true.B, true.B, false.B) //mma
+      AME.apply.load_ins_step(dut) 
+
+      dut.io.Uop_io.ShakeHands_io.valid.poke(false.B)//结束
+ 
+      var cycleCountMLU = 0
+
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕,这里的sigDone是MMAU的
+        AME.apply.load_ins_step(dut)
+        cycleCountMLU += 1
+      }
+
+      // println(s"cycleCountReady = $cycleCountReady , cycleCountMLU = $cycleCountMLU")
+      AME.apply.readTestDataFromAll(AMETestData.C, 4, dut)  //验证结果是否正确
+      
+
+
+    }
+  }
+}
+
+
 
 
 //AME完整测试，仅测load B指令
@@ -80,6 +125,90 @@ println(f"readData = 0x${readData.litValue}%0128X, id = $id")
   }
 }
 
+
+
+
+//AME完整测试，仅测load B指令，使用IssueQueen
+class AMETest_loadB_usingQueen extends AnyFreeSpec with Matchers {
+
+  "AMETest_loadB_usingQueen should PASS" in {
+    simulate(new AME) { dut =>
+
+      L2Sim.loadDataFrom(L2TestData.L2_Data, 0)//初始化L2
+
+      
+      
+      dut.clock.step(1) //等待上电稳定
+
+
+      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8)
+
+
+      AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B) //非全尺寸
+      AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 2, 0, 256, true.B, false.B, true.B) //非全尺寸
+      // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 3, 0, 256, true.B, false.B, true.B) //非全尺寸
+      // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 0, 0, 256, true.B, false.B, true.B) //非全尺寸
+      // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      // AME.apply.IssueQueen_Push_Step(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B)
+
+      dut.io.Uop_io.ShakeHands_io.valid.poke(false.B)
+      // AME.apply.IssueQueen_Push_Step(dut, 35, 35, 100, 0, 0, 2, 0, 256, false.B, false.B, false.B) //结束
+ 
+      var cycleCountMLU = 0
+
+
+println(s"ins 1 excuting")
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        AME.apply.load_ins_step(dut)
+        cycleCountMLU += 1
+      }
+
+//       AME.apply.load_ins_step(dut)
+
+// println(s"ins 2 excuting")
+
+//       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+//         AME.apply.load_ins_step(dut)
+//         cycleCountMLU += 1
+//       }
+
+//       AME.apply.load_ins_step(dut)
+
+// println(s"ins 3 excuting")
+
+//       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+//         AME.apply.load_ins_step(dut)
+//         cycleCountMLU += 1
+//       }
+
+
+//       AME.apply.load_ins_step(dut)
+
+// println(s"ins 4 excuting")
+
+//       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+//         AME.apply.load_ins_step(dut)
+//         cycleCountMLU += 1
+//       }
+
+      // println(s"cycleCountReady = $cycleCountReady , cycleCountMLU = $cycleCountMLU")
+      AME.apply.readTestDataFromAll(RFTestData.A, 1, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(RFTestData.A, 2, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(RFTestData.A, 3, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(RFTestData.A, 0, dut) //验证结果是否正确
+
+
+    }
+  }
+}
 
 
 
@@ -207,154 +336,83 @@ println(s"ins 3 excuting")
 
 
 
-// //完整Expander版本,带恶心的debug
-// class AMETest extends AnyFreeSpec with Matchers {
 
-//   "AME should PASS" in {
-//     simulate(new AME) { dut =>
+//AME完整测试，仅测mma指令
+class AMETest_mma_usingQueen extends AnyFreeSpec with Matchers {
+
+  "AME_mma should PASS" in {
+    simulate(new AME) { dut =>
     
       
-//       /*  提前手动写入A、B、C*/
-//       AME.apply.writeTestDataToAll(AMETestData.A, 0, dut)
-//       AME.apply.writeTestDataToAll(AMETestData.B, 1, dut)
-//       AME.apply.writeTestDataToAll(AMETestData.Ctmp, 4, dut)
-//       AME.apply.writeTestDataToAll(AMETestData.Ctmp, 5, dut)
-//       AME.apply.writeTestDataToAll(AMETestData.Ctmp, 6, dut)
-//       AME.apply.writeTestDataToAll(AMETestData.Ctmp, 7, dut)
+      /*  提前手动写入A、B、C*/
+      AME.apply.writeTestDataToAll(AMETestData.A, 0, dut)
+      AME.apply.writeTestDataToAll(AMETestData.B, 1, dut)
+      AME.apply.writeTestDataToAll(AMETestData.Ctmp, 4, dut)
+      AME.apply.writeTestDataToAll(AMETestData.Ctmp, 5, dut)
+      AME.apply.writeTestDataToAll(AMETestData.Ctmp, 6, dut)
+      AME.apply.writeTestDataToAll(AMETestData.Ctmp, 7, dut)
 
-//       dut.clock.step(1000) //随便跑几个cycle
-
-
-
-//       // ins1
-//       var cycleCountMMAU = 0
-//       var cycleCountReady = 0
-
-//       AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 4, true.B, true.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
-
-//       while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
-//         dut.clock.step(1)
-//         cycleCountReady += 1
-//       }
-
-//       dut.clock.step(1) //ready后需要主动前进一个时钟周期
-
-// AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //
-
-//       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
-//         dut.clock.step(1)
-//         cycleCountMMAU += 1
-
-// AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //
-//       }
-
-
-//       println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
-
-// // println(s"Done = ${dut.io.sigDone.peek().litToBoolean}")
-
-// // println(s"ready = ${dut.io.ShakeHands_io.ready.peek().litToBoolean}")
-
-
-//       // ins2
-
-//       cycleCountReady = 0
-//       cycleCountMMAU = 0  //计数清零
-
-
-//       AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, true.B, true.B)  //下一条指令，换一个C
-// // println(s"Done = ${dut.io.sigDone.peek().litToBoolean}")
-
-//       while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
-//         dut.clock.step(1)
-//         cycleCountReady += 1
-        
-// // println(s"ready = ${dut.io.ShakeHands_io.ready.peek().litToBoolean}")
-// // println(s"Done = ${dut.io.sigDone.peek().litToBoolean}")
-//       }
-
-// // println(s"Done = ${dut.io.sigDone.peek().litToBoolean}")
-
-//       dut.clock.step(1) //ready后需要主动前进一个时钟周期
-// // println(s"ready = ${dut.io.ShakeHands_io.ready.peek().litToBoolean}")
-// // println(s"Done = ${dut.io.sigDone.peek().litToBoolean}")
-
-//       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
-//         dut.clock.step(1)
-//         cycleCountMMAU += 1
-
-// AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 4, true.B, true.B)
-// // println(s"ready = ${dut.io.ShakeHands_io.ready.peek().litToBoolean}")
-//       }
-
-// // println(s"ready = ${dut.io.ShakeHands_io.ready.peek().litToBoolean}")
-//       println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
-
-
-//       // ins3
-
-//       cycleCountReady = 0
-//       cycleCountMMAU = 0  //计数清零
-
-
-//       AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, true.B, true.B)  //下一条指令，换一个C
-// // println(s"ready = ${dut.io.ShakeHands_io.ready.peek().litToBoolean}")
-//       while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
-//         dut.clock.step(1)
-//         cycleCountReady += 1
-//       }
-
-//       dut.clock.step(1) //ready后需要主动前进一个时钟周期
-
-//       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
-//         dut.clock.step(1)
-//         cycleCountMMAU += 1
-//       }
-
-//       println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
-
-
-
-//       // ins4
-
-//       cycleCountReady = 0
-//       cycleCountMMAU = 0  //计数清零
-
-
-//       AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 7, true.B, true.B)  //下一条指令，换一个C
-
-//       while(!dut.io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
-//         dut.clock.step(1)
-//         cycleCountReady += 1
-//       }
-
-//       dut.clock.step(1) //ready后需要主动前进一个时钟周期
-
-//       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
-//         dut.clock.step(1)
-//         cycleCountMMAU += 1
-//       }
-
-//       println(s"cycleCountReady = $cycleCountReady , cycleCountMMAU = $cycleCountMMAU")
+      dut.clock.step(1000) //随便跑几个cycle
 
       
 
-//       AME.apply.AMEStop(dut)  //停止，无效指令，valid = false
 
-//       AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
-//       AME.apply.readTestDataFromAll(AMETestData.C, 5, dut) //验证结果是否正确
-//       // AME.apply.readTestDataFromAll(AMETestData.C, 6, dut) //验证结果是否正确
-//       // AME.apply.readTestDataFromAll(AMETestData.C, 7, dut) //验证结果是否正确
+
+      // // ins1
+      var cycleCountMMAU = 0
+      var cycleCountReady = 0
+
+      AME.apply.IssueQueen_Push_Step(dut, 32, 32, 64, 0, 1, 4, 0, 0, true.B, true.B, false.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+      // AME.apply.IssueQueen_Push_Step(dut, 32, 32, 64, 0, 1, 5, 0, 0, true.B, true.B, false.B)  //下一条指令
+      // AME.apply.IssueQueen_Push_Step(dut, 32, 32, 64, 0, 1, 6, 0, 0, true.B, true.B, false.B)  //下一条指令
+
+      // AME.apply.IssueQueen_Push_Step(dut, 32, 32, 64, 0, 1, 6, 0, 0, false.B, false.B, false.B)  //结束
+      dut.io.Uop_io.ShakeHands_io.valid.poke(false.B)   //结束
+
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕，此时只有第1条指令执行完毕
+        dut.clock.step(1)
+        cycleCountMMAU += 1
+      }
+
+      println(s"cycleCountMMAU = $cycleCountMMAU")
+
+      // dut.clock.step(1)
+      // cycleCountMMAU += 1
+
+
+      // while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕，此时只有第2条指令执行完毕
+      //   dut.clock.step(1)
+      //   cycleCountMMAU += 1
+
+      //   // println(s"111")
+      // }
+
+
+      // dut.clock.step(1)
+      // cycleCountMMAU += 1
+
+
+      // while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕，此时只有第3条指令执行完毕
+      //   dut.clock.step(1)
+      //   cycleCountMMAU += 1
+
+      //   // println(s"222")
+      // }
+
+
+
+
+      AME.apply.readTestDataFromAll(AMETestData.C, 4, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(AMETestData.C, 5, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(AMETestData.C, 6, dut) //验证结果是否正确
+      // AME.apply.readTestDataFromAll(AMETestData.C, 7, dut) //验证结果是否正确
 
 
  
 
 
-//     }
-//   }
-// }
-
-
-
-
+    }
+  }
+}
 

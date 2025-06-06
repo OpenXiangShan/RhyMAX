@@ -221,12 +221,14 @@ class FSM_MLU extends Module{ //MLU状态机
   val wireReqDone = Mux(regRow === nRow - 1.U && regCol === nCol - 1.U , true.B , false.B)  //暂时先这么处理把
   // io.sigReqDone := wireReqDone
 
+
+
   /*  sigDone  */
   val wireDone = Wire(Bool())
   val regCntDone = RegInit(VecInit(Seq.fill(8)(0.U(log2Ceil(8 * 4 * 8 + 1).W)))) //对应8条sigLineDone，用于计数，从0开始，计到nRow * nCol * 8 则满
 
   for(i <- 0 until 8){
-    when(io.sigStart && wireDone){  //启动时归0；Load结束后也归零，这样Done信号就不会一直拉高
+    when(io.sigStart || wireDone){  //启动时归0；Load结束后也归零，这样Done信号就不会一直拉高
       regCntDone(i) := 0.U
     }.elsewhen(io.FSM_MLU_io.sigLineDone(i)){ //由MLU告知成功写入一条数据，则+1
       regCntDone(i) := regCntDone(i) + 1.U
@@ -234,15 +236,23 @@ class FSM_MLU extends Module{ //MLU状态机
       regCntDone(i) := regCntDone(i)
     }
 
-// //debug
-// printf(p"regCntDone($i) = ${regCntDone(i)} , io.FSM_MLU_io.sigLineDone($i) = ${io.FSM_MLU_io.sigLineDone(i)}\n")  
+//debug
+printf(p"regCntDone($i) = ${regCntDone(i)} , io.FSM_MLU_io.sigLineDone($i) = ${io.FSM_MLU_io.sigLineDone(i)}\n")  
   } 
-// printf(p"nRow = $nRow , nCol = $nCol\n") 
+printf(p"nRow = $nRow , nCol = $nCol\n") 
 
-  wireDone := regCntDone.map(_ === (nRow * nCol * 8.U)).reduce(_ && _)  //所有regCntDone均为nRow * nCol * 8，则Load结束
+  val allDone = regCntDone.map(_ === (nRow * nCol * 8.U)).reduce(_ && _)   //均为nRow * nCol * 8
+  val allZero = regCntDone.map(_ === 0.U).reduce(_ && _)  //均为0
+  wireDone := allDone && !allZero   //所有regCntDone均为nRow * nCol * 8，则Load结束(该逻辑仅在Load执行期间生效，其余时间默认为false)
+
+  // wireDone := regCntDone.map(_ === (nRow * nCol * 8.U)).reduce(_ && _)   //所有regCntDone均为nRow * nCol * 8，则Load结束(该逻辑仅在Load执行期间生效，其余时间默认为false)
   io.sigDone := wireDone
   // io.sigDone := io.FSM_MLU_io.sigDone //由MLU告知是否结束，并逐级向上传递
   // io.sigDone := wireReqDone //!!!暂时等同于sigReqDone
+
+
+
+
 
   /*  valid   */
   val regL2State = RegInit(false.B)  //指示L2是否为工作状态，影响访问L2信号valid是否有效
@@ -258,9 +268,10 @@ class FSM_MLU extends Module{ //MLU状态机
   }
 
   /*  Port State  */
-  val regPortState = RegInit(false.B)  //指示L2是否为工作状态，影响访问L2信号valid是否有效
 
-  when(io.sigStart){//sigStart信号开始，直到Load指令结束
+  val regPortState = RegInit(false.B)  //sigStart信号开始，直到Load指令结束，用于RF的Port的激活或注销
+
+  when(io.sigStart){//
     regPortState := true.B
   }.elsewhen(wireDone){
     regPortState := false.B
@@ -275,6 +286,8 @@ class FSM_MLU extends Module{ //MLU状态机
   //   printf(p"$i : addr = ${io.FSM_MLU_io.Cacheline_Read_io(i).addr} , id = ${io.FSM_MLU_io.Cacheline_Read_io(i).id}\n")
   // }
   // printf(p"\n\n")
+
+
 
 }
 
