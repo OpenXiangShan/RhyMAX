@@ -6,6 +6,7 @@ import chisel3.util._
 import common._
 import Expander._
 import RegFile._
+import IssueQueen._
 
 
 
@@ -17,7 +18,20 @@ class MLU extends Module{
     })
 
     /*  read from L2 */
-    io.FSM_MLU_io.Cacheline_Read_io <> io.MLU_L2_io.Cacheline_Read_io
+    val readBuffer = Seq.fill(8)(Module(new SimpleHandshakeFIFO(depth = 10, width = Consts.L2_ADDR_LEN + Consts.L2_ID_LEN))) //L2读请求缓冲
+    for(y <- 0 until 8){//对每个Cacheline
+        //写入FIFO
+        readBuffer(y).io.enq_valid := io.FSM_MLU_io.Cacheline_Read_io(y).valid
+        io.FSM_MLU_io.Cacheline_Read_io(y).ready := readBuffer(y).io.enq_ready  //实际没有作用,FSM不管这个信号,因此FIFO要足够大
+        readBuffer(y).io.enq_bits := Cat(io.FSM_MLU_io.Cacheline_Read_io(y).addr , io.FSM_MLU_io.Cacheline_Read_io(y).id) 
+
+        //读出FIFO
+        io.MLU_L2_io.Cacheline_Read_io(y).valid := readBuffer(y).io.deq_valid
+        readBuffer(y).io.deq_ready := io.MLU_L2_io.Cacheline_Read_io(y).ready
+        io.MLU_L2_io.Cacheline_Read_io(y).addr := readBuffer(y).io.deq_bits(Consts.L2_ADDR_LEN + Consts.L2_ID_LEN - 1 , Consts.L2_ID_LEN)
+        io.MLU_L2_io.Cacheline_Read_io(y).id := readBuffer(y).io.deq_bits(Consts.L2_ID_LEN - 1 , 0)
+    }
+    // io.FSM_MLU_io.Cacheline_Read_io <> io.MLU_L2_io.Cacheline_Read_io
 
     /*    写RF    */
     val wireSplit = Wire(Vec(8, Vec(8, UInt((64 + 5 + 3).W))))  //接MultiInputMux，每个cacheline有8路

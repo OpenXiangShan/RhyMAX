@@ -143,9 +143,12 @@ class AMETest_loadB_usingQueen extends AnyFreeSpec with Matchers {
 
       // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8)
 
-
-      AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B) //非全尺寸
+      AME.apply.IssueQueen_Push_noStep(dut, 64, 64, 256, 0, 0, 1, 0, 256, true.B, false.B, true.B) //全尺寸
       AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+
+      // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B) //非全尺寸
+      // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
 
       // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 2, 0, 256, true.B, false.B, true.B) //非全尺寸
       // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
@@ -201,9 +204,9 @@ println(s"ins 1 excuting")
 
       // println(s"cycleCountReady = $cycleCountReady , cycleCountMLU = $cycleCountMLU")
       AME.apply.readTestDataFromAll(RFTestData.A, 1, dut) //验证结果是否正确
-      AME.apply.readTestDataFromAll(RFTestData.A, 2, dut) //验证结果是否正确
-      AME.apply.readTestDataFromAll(RFTestData.A, 3, dut) //验证结果是否正确
-      AME.apply.readTestDataFromAll(RFTestData.A, 0, dut) //验证结果是否正确
+      // AME.apply.readTestDataFromAll(RFTestData.A, 2, dut) //验证结果是否正确
+      // AME.apply.readTestDataFromAll(RFTestData.A, 3, dut) //验证结果是否正确
+      // AME.apply.readTestDataFromAll(RFTestData.A, 0, dut) //验证结果是否正确
 
 
     }

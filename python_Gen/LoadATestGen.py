@@ -20,12 +20,12 @@ n = 32
 k = 8
 
 # 用户配置矩阵尺寸
-# mtilem = 64
-# mtilen = 64
-# mtilek = 256
-mtilem = 35
-mtilen = 35
-mtilek = 100
+mtilem = 64
+mtilen = 64
+mtilek = 256
+# mtilem = 35
+# mtilen = 35
+# mtilek = 100
 
 # ==== 断言 ====
 assert row >= 64, "row must be >= 64"

@@ -27,8 +27,8 @@ class Expander extends Module{
     val subIssueMLU = Module(new IssueMLU)
 
     /*  for debug   */
-    io.sigDone := subIssueMMAU.io.IssueMMAU_Excute_io.sigDone
-    // io.sigDone := subIssueMLU.io.IssueMLU_Excute_io.sigDone
+    // io.sigDone := subIssueMMAU.io.IssueMMAU_Excute_io.sigDone
+    io.sigDone := subIssueMLU.io.IssueMLU_Excute_io.sigDone
 
 //debug
 printf(p"[ExcuteHandler] sigDone = ${io.sigDone}\n") 

@@ -146,6 +146,8 @@ class IssueMMAU_Excute_IO extends Bundle{//连接ExcuteHandler
 /*    MLU   */
 
 class Cacheline_Read_IO extends Bundle{ //向L2发送读请求（单条cacheline）
+  val ready = Input(Bool()) //标志L2是否就绪,即反压信号
+  
   val addr = Output(UInt(Consts.L2_ADDR_LEN.W))
   val id = Output(UInt(Consts.L2_ID_LEN.W))
   val valid = Output(Bool())  //指示当前产生的读请求是否有意义

@@ -284,6 +284,8 @@ object apply {
   //手动从L2读进AME，同时前进一个时钟
   def load_ins_step(dut: AME): Unit = {
     for(i <- 0 until 8){//8条cacheline
+          dut.io.MLU_L2_io.Cacheline_Read_io(i).ready.poke(true.B)  //L2始终就绪
+
           if(dut.io.MLU_L2_io.Cacheline_Read_io(i).valid.peek().litToBoolean){//对L2读请求有意义
             val addr_req = dut.io.MLU_L2_io.Cacheline_Read_io(i).addr.peek().litValue.toInt
             val id_req = dut.io.MLU_L2_io.Cacheline_Read_io(i).id.peek().litValue.toInt
