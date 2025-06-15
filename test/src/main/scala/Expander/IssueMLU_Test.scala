@@ -19,6 +19,7 @@ class IssueMLU_Test extends AnyFreeSpec with Matchers {
     
       dut.io.IssueMLU_Excute_io.sigStart.poke(true.B)
       dut.io.IssueMLU_Excute_io.is_mlbe8.poke(true.B)
+      dut.io.IssueMLU_Excute_io.is_mlae8.poke(false.B)
       dut.io.IssueMLU_Excute_io.rs1.poke(0.U)   //baseaddr
       dut.io.IssueMLU_Excute_io.rs2.poke(100.U) //stride
       dut.io.IssueMLU_Excute_io.in_md.poke(2.U)

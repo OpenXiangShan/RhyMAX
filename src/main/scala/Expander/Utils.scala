@@ -29,6 +29,7 @@ class Operands_IO extends Bundle{//操作数信息
 class InsType_IO extends Bundle{//指令类型
   val is_mmacc = Input(Bool())      //整型矩阵乘,signed 8bit, output quad-widen
   val is_mlbe8 = Input(Bool())      //load指令,8-bit right tile load
+  val is_mlae8 = Input(Bool())      //load指令,8-bit left tile load
 }
 
 
@@ -178,6 +179,7 @@ class MLU_L2_IO extends Bundle{ //MLU访问L2
 class IssueMLU_Excute_IO extends Bundle{//连接ExcuteHandler
   val sigStart = Input(Bool())    //启动信号
   val is_mlbe8 = Input(Bool())
+  val is_mlae8 = Input(Bool())
   // val is_shaked = Input(Bool()) //是否握手成功
   val rs1 = Input(UInt(Consts.rs1_LEN.W))  //baseaddr
   val rs2 = Input(UInt(Consts.rs2_LEN.W))   //stride

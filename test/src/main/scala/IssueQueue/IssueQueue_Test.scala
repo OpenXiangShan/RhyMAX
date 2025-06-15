@@ -13,12 +13,12 @@ class IssueQueen_Test extends AnyFreeSpec with Matchers {
   "IssueQueen should PASS" in {
     simulate(new IssueQueen) { dut =>
       val uopSeq = Seq(
-        (0, 1, 3, 1, 2, true,  false, 3, 4, 5),
-        (4, 2, 5, 6, 7, false, true,  8, 9, 10),
-        (2, 1, 3, 1, 2, true,  false, 3, 4, 5),
-        (3, 2, 5, 6, 7, false, true,  8, 9, 10),
-        (6, 1, 3, 1, 2, true,  false, 3, 4, 5),
-        (8, 2, 5, 6, 7, false, true,  8, 9, 10),
+        (0, 1, 3, 1, 2, true,  false, false, 3, 4, 5),
+        (4, 2, 5, 6, 7, false, true,  false, 8, 9, 10),
+        (2, 1, 3, 1, 2, true,  false, false, 3, 4, 5),
+        (3, 2, 5, 6, 7, false, true,  false, 8, 9, 10),
+        (6, 1, 3, 1, 2, true,  false, false, 3, 4, 5),
+        (8, 2, 5, 6, 7, false, true,  false, 8, 9, 10),
       )
 
       var pushIdx = 0
@@ -28,7 +28,7 @@ class IssueQueen_Test extends AnyFreeSpec with Matchers {
       dut.clock.step(1) //使DUT进入工作状态，否则初始状态enq_ready为false
 
       while (dut.io.Uop_In_io.ShakeHands_io.ready.peek().litToBoolean) {
-        val (ms1, ms2, md, rs1, rs2, is_mmacc, is_mlbe8, m, n, k) = uopSeq(pushIdx)
+        val (ms1, ms2, md, rs1, rs2, is_mmacc, is_mlbe8, is_mlae8, m, n, k) = uopSeq(pushIdx)
 
         dut.io.Uop_In_io.Operands_io.ms1.poke(ms1.U)
         dut.io.Uop_In_io.Operands_io.ms2.poke(ms2.U)
@@ -38,6 +38,7 @@ class IssueQueen_Test extends AnyFreeSpec with Matchers {
 
         dut.io.Uop_In_io.InsType_io.is_mmacc.poke(is_mmacc.B)
         dut.io.Uop_In_io.InsType_io.is_mlbe8.poke(is_mlbe8.B)
+        dut.io.Uop_In_io.InsType_io.is_mlae8.poke(is_mlae8.B)
 
         dut.io.Uop_In_io.mtileConfig_io.mtilem.poke(m.U)
         dut.io.Uop_In_io.mtileConfig_io.mtilen.poke(n.U)
@@ -67,12 +68,13 @@ class IssueQueen_Test extends AnyFreeSpec with Matchers {
 
         val is_mmacc = out.InsType_io.is_mmacc.peek().litToBoolean
         val is_mlbe8 = out.InsType_io.is_mlbe8.peek().litToBoolean
+        val is_mlae8 = out.InsType_io.is_mlae8.peek().litToBoolean
 
         val m = out.mtileConfig_io.mtilem.peek().litValue
         val n = out.mtileConfig_io.mtilen.peek().litValue
         val k = out.mtileConfig_io.mtilek.peek().litValue
 
-        println(f"$ms1, $ms2, $md, $rs1, $rs2, $is_mmacc, $is_mlbe8, $m, $n, $k")
+        println(f"$ms1, $ms2, $md, $rs1, $rs2, $is_mmacc, $is_mlbe8, $is_mlae8, $m, $n, $k")
 
         popCount += 1
         dut.clock.step(1)

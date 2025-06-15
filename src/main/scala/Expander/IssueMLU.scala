@@ -23,7 +23,9 @@ class IssueMLU extends Module{
   val reg_rs1 = RegInit(0.U(Consts.rs1_LEN.W))
   val reg_rs2 = RegInit(0.U(Consts.rs2_LEN.W))
   val reg_md = RegInit(0.U(Consts.All_ADDR_LEN.W))
+
   val reg_is_mlbe8 = RegInit(false.B)
+  val reg_is_mlae8 = RegInit(false.B)
 
   when(io.IssueMLU_Excute_io.sigStart){//接到start信号，更新info
     reg_mtilem := io.IssueMLU_Excute_io.mtilem
@@ -32,7 +34,9 @@ class IssueMLU extends Module{
     reg_rs1 := io.IssueMLU_Excute_io.rs1
     reg_rs2 := io.IssueMLU_Excute_io.rs2
     reg_md := io.IssueMLU_Excute_io.in_md
+
     reg_is_mlbe8 := io.IssueMLU_Excute_io.is_mlbe8
+    reg_is_mlae8 := io.IssueMLU_Excute_io.is_mlae8
   }
   // .otherwise{
   //   reg_mtilem := reg_mtilem
@@ -60,6 +64,7 @@ printf(p"[debug] MLU_sigStart = ${io.IssueMLU_Excute_io.sigStart}, " +
   /*    between Top and TileHandler    */
   // subTileHandler.io.is_mlbe8 := io.IssueMLU_Excute_io.is_mlbe8 //被你害惨了
   subTileHandler.io.is_mlbe8 := reg_is_mlbe8
+  subTileHandler.io.is_mlae8 := reg_is_mlae8
 
   /*    between Top and regInfo    */
   //done above

@@ -34,7 +34,7 @@ assert (startAddr % stride) + mtilek <= stride, "(startAddr % stride) + mtilek m
 assert (startAddr // stride) + tileM <= row, "(startAddr // stride) + tileM must be <= row"
 
 # ==== 路径设定 ====
-output_dir = "../test/src/main/scala/L2/TestData"
+output_dir = "../../test/src/main/scala/L2/TestData"
 os.makedirs(output_dir, exist_ok=True)
 
 # ==== 生成 L2_Data ====

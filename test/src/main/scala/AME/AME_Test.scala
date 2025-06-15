@@ -29,16 +29,16 @@ class AMETest_allIns_usingQueen extends AnyFreeSpec with Matchers {
       dut.clock.step(1) //等待上电稳定
 
 
-      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8)
+      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8 , is_mlae8)
 
 
-      AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 0, 0, 256, true.B, false.B, true.B) //load A
+      AME.apply.IssueQueen_Push_noStep(dut, 64, 64, 256, 0, 0, 0, 0, 256, true.B, false.B, true.B , false.B) //load B
       AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
 
-      AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B) //load B
+      AME.apply.IssueQueen_Push_noStep(dut, 64, 64, 256, 0, 0, 1, 0, 256, true.B, false.B, false.B , true.B ) //load A
       AME.apply.load_ins_step(dut) 
 
-      AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 1, 4, 0, 256, true.B, true.B, false.B) //mma
+      AME.apply.IssueQueen_Push_noStep(dut, 64, 64, 256, 0, 1, 4, 0, 256, true.B, true.B, false.B , false.B) //mma
       AME.apply.load_ins_step(dut) 
 
       dut.io.Uop_io.ShakeHands_io.valid.poke(false.B)//结束
@@ -71,10 +71,10 @@ class AMETest_loadB extends AnyFreeSpec with Matchers {
 
       L2Sim.loadDataFrom(L2TestData.L2_Data, 0)//初始化L2
 
-      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8)
+      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8 , is_mlae8)
       // AME.apply.AMEStart(dut, 64, 64, 256, 0, 0, 1, 0, 256, true.B, false.B, true.B) //全尺寸
       // AME.apply.AMEStart(dut, 40, 40, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B) //非全尺寸
-      AME.apply.AMEStart(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B) //非全尺寸
+      AME.apply.AMEStart(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B , false.B) //非全尺寸
  
       var cycleCountMLU = 0
       var cycleCountReady = 0
@@ -141,9 +141,9 @@ class AMETest_loadB_usingQueen extends AnyFreeSpec with Matchers {
       dut.clock.step(1) //等待上电稳定
 
 
-      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8)
+      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8 , is_mlae8)
 
-      AME.apply.IssueQueen_Push_noStep(dut, 64, 64, 256, 0, 0, 1, 0, 256, true.B, false.B, true.B) //全尺寸
+      AME.apply.IssueQueen_Push_noStep(dut, 64, 30, 256, 0, 0, 1, 0, 256, true.B, false.B, false.B , true.B  ) //全尺寸
       AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
 
 
@@ -215,6 +215,97 @@ println(s"ins 1 excuting")
 
 
 
+//AME完整测试，仅测load A指令，使用IssueQueen
+class AMETest_loadA_usingQueen extends AnyFreeSpec with Matchers {
+
+  "AMETest_loadA_usingQueen should PASS" in {
+    simulate(new AME) { dut =>
+
+      L2Sim.loadDataFrom(L2TestData.L2_Data, 0)//初始化L2
+
+      
+      
+      dut.clock.step(1) //等待上电稳定
+
+
+      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8 , is_mlae8)
+
+      AME.apply.IssueQueen_Push_noStep(dut, 64, 30, 256, 0, 0, 1, 0, 256, true.B, false.B, false.B , true.B  ) //全尺寸
+      AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      AME.apply.IssueQueen_Push_noStep(dut, 64, 30, 256, 0, 0, 2, 0, 256, true.B, false.B, false.B , true.B  ) //全尺寸
+      AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      AME.apply.IssueQueen_Push_noStep(dut, 64, 30, 256, 0, 0, 3, 0, 256, true.B, false.B, false.B , true.B  ) //全尺寸
+      AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+
+      // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B) //非全尺寸
+      // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 2, 0, 256, true.B, false.B, true.B) //非全尺寸
+      // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 3, 0, 256, true.B, false.B, true.B) //非全尺寸
+      // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      // AME.apply.IssueQueen_Push_noStep(dut, 35, 35, 100, 0, 0, 0, 0, 256, true.B, false.B, true.B) //非全尺寸
+      // AME.apply.load_ins_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      // AME.apply.IssueQueen_Push_Step(dut, 35, 35, 100, 0, 0, 1, 0, 256, true.B, false.B, true.B)
+
+      dut.io.Uop_io.ShakeHands_io.valid.poke(false.B)
+      // AME.apply.IssueQueen_Push_Step(dut, 35, 35, 100, 0, 0, 2, 0, 256, false.B, false.B, false.B) //结束
+ 
+      var cycleCountMLU = 0
+
+
+println(s"ins 1 excuting")
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        AME.apply.load_ins_step(dut)
+        cycleCountMLU += 1
+      }
+
+      AME.apply.load_ins_step(dut)
+
+println(s"ins 2 excuting")
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        AME.apply.load_ins_step(dut)
+        cycleCountMLU += 1
+      }
+
+      AME.apply.load_ins_step(dut)
+
+println(s"ins 3 excuting")
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        AME.apply.load_ins_step(dut)
+        cycleCountMLU += 1
+      }
+
+
+//       AME.apply.load_ins_step(dut)
+
+// println(s"ins 4 excuting")
+
+//       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+//         AME.apply.load_ins_step(dut)
+//         cycleCountMLU += 1
+//       }
+
+      // println(s"cycleCountReady = $cycleCountReady , cycleCountMLU = $cycleCountMLU")
+      AME.apply.readTestDataFromAll(RFTestData.A, 1, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(RFTestData.A, 2, dut) //验证结果是否正确
+      AME.apply.readTestDataFromAll(RFTestData.A, 3, dut) //验证结果是否正确
+      // AME.apply.readTestDataFromAll(RFTestData.A, 0, dut) //验证结果是否正确
+
+
+    }
+  }
+}
+
 
 
 
@@ -243,7 +334,7 @@ class AMETest_mma extends AnyFreeSpec with Matchers {
       var cycleCountMMAU = 0
       var cycleCountReady = 0
 
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 4, 0, 0, true.B, true.B, false.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 4, 0, 0, true.B, true.B, false.B , false.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
 
       while(!dut.io.Uop_io.ShakeHands_io.ready.peek().litToBoolean){ //等到ready
         dut.clock.step(1)
@@ -255,7 +346,7 @@ class AMETest_mma extends AnyFreeSpec with Matchers {
 println(s"ins 1 excuting")
 
 
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, 0, 0, true.B, true.B, false.B)  //下一条指令ins2，应该没有响应
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 5, 0, 0, true.B, true.B, false.B , false.B)  //下一条指令ins2，应该没有响应
 
 
       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
@@ -284,7 +375,7 @@ println(s"ins 1 excuting")
 
 println(s"ins 2 excuting")
 
-      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, 0, 0, true.B, true.B, false.B)  //下一条指令ins3，应该没有响应
+      AME.apply.AMEStart(dut, 32, 32, 64, 0, 1, 6, 0, 0, true.B, true.B, false.B , false.B)  //下一条指令ins3，应该没有响应
 
       while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
         dut.clock.step(1)
@@ -365,7 +456,7 @@ class AMETest_mma_usingQueen extends AnyFreeSpec with Matchers {
       var cycleCountMMAU = 0
       var cycleCountReady = 0
 
-      AME.apply.IssueQueen_Push_Step(dut, 32, 32, 64, 0, 1, 4, 0, 0, true.B, true.B, false.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+      AME.apply.IssueQueen_Push_Step(dut, 32, 32, 64, 0, 1, 4, 0, 0, true.B, true.B, false.B , false.B)  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
       // AME.apply.IssueQueen_Push_Step(dut, 32, 32, 64, 0, 1, 5, 0, 0, true.B, true.B, false.B)  //下一条指令
       // AME.apply.IssueQueen_Push_Step(dut, 32, 32, 64, 0, 1, 6, 0, 0, true.B, true.B, false.B)  //下一条指令
 

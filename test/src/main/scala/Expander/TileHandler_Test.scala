@@ -19,6 +19,8 @@ class TileHandler_MLU_Test extends AnyFreeSpec with Matchers {
     
       // 输入用户配置尺寸
       dut.io.is_mlbe8.poke(true.B)
+      dut.io.is_mlae8.poke(false.B)
+
       dut.io.mtileConfig_io.mtilem.poke(1.U)
       dut.io.mtileConfig_io.mtilen.poke(0.U)
       dut.io.mtileConfig_io.mtilek.poke(1.U)

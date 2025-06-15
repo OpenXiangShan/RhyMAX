@@ -54,10 +54,15 @@ class ExcuteHandler extends Module {
   io.IssueMLU_Excute_io.rs1      := 0.U
   io.IssueMLU_Excute_io.rs2      := 0.U
   io.IssueMLU_Excute_io.in_md    := 0.U
-  io.IssueMLU_Excute_io.is_mlbe8 := false.B
   io.IssueMLU_Excute_io.mtilem   := 0.U
   io.IssueMLU_Excute_io.mtilen   := 0.U
   io.IssueMLU_Excute_io.mtilek   := 0.U
+
+  io.IssueMLU_Excute_io.is_mlbe8 := false.B
+  io.IssueMLU_Excute_io.is_mlae8 := false.B
+
+  val is_MLU_ins = Wire(Bool()) //指令为Load指令
+  is_MLU_ins := uop.InsType_io.is_mlbe8 || uop.InsType_io.is_mlae8
 
   // ----------- ready 信号仲裁 -----------
   val mma_ready = uop.InsType_io.is_mmacc && {
@@ -66,7 +71,7 @@ class ExcuteHandler extends Module {
     regFree && unitFree
   }
 
-  val mlu_ready = uop.InsType_io.is_mlbe8 && {
+  val mlu_ready = is_MLU_ins && {
     val regFree = sb.read_RF(md) === 0.U
     val unitFree = sb.read_Unit(MLU_Bit) === 0.U
     regFree && unitFree
@@ -100,15 +105,19 @@ class ExcuteHandler extends Module {
     }
 
   // ----------- MLU逻辑 -----------
-  when (uop.InsType_io.is_mlbe8) {
+  
+
+  when (is_MLU_ins) {
     io.IssueMLU_Excute_io.sigStart := is_shaked
     io.IssueMLU_Excute_io.rs1      := rs1
     io.IssueMLU_Excute_io.rs2      := rs2
     io.IssueMLU_Excute_io.in_md    := md
-    io.IssueMLU_Excute_io.is_mlbe8 := true.B
     io.IssueMLU_Excute_io.mtilem   := uop.mtileConfig_io.mtilem
     io.IssueMLU_Excute_io.mtilen   := uop.mtileConfig_io.mtilen
     io.IssueMLU_Excute_io.mtilek   := uop.mtileConfig_io.mtilek
+
+    io.IssueMLU_Excute_io.is_mlbe8 := uop.InsType_io.is_mlbe8
+    io.IssueMLU_Excute_io.is_mlae8 := uop.InsType_io.is_mlae8
 
     when (is_shaked) {
       sb.writeMaskAlloc_RF   := (1.U << md)

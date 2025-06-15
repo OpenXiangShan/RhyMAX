@@ -11,6 +11,8 @@ import MMAU._
 class TileHandler_MLU extends Module {
   val io = IO(new Bundle {
     val is_mlbe8 = Input(Bool())
+    val is_mlae8 = Input(Bool())
+    
     val mtileConfig_io = new mtileConfig_IO
     val TileHandler_MLU_io = new TileHandler_MLU_IO
   })
@@ -26,11 +28,20 @@ class TileHandler_MLU extends Module {
   nCol := 0.U
 
   when(io.is_mlbe8) {
-    // ceil(x / 8) == (x + 7) >> 3
+
     nRow := (io.mtileConfig_io.mtilen + 7.U) >> 3
-    // ceil(x / 64) == (x + 63) >> 6
     nCol := (io.mtileConfig_io.mtilek + 63.U) >> 6
+
+  }.elsewhen(io.is_mlae8) {
+
+    nRow := (io.mtileConfig_io.mtilem + 7.U) >> 3
+    nCol := (io.mtileConfig_io.mtilek + 63.U) >> 6
+
   }
+
+//debug
+printf(p"[TileHandler] io.is_mlbe8 = ${io.is_mlbe8} , io.is_mlae8 = ${io.is_mlae8}  \n") 
+printf(p"[TileHandler] nRow = ${nRow} , nCol = ${nCol}  \n") 
 
   io.TileHandler_MLU_io.nRow := nRow
   io.TileHandler_MLU_io.nCol := nCol

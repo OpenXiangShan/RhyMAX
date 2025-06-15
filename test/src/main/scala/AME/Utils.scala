@@ -172,7 +172,7 @@ object apply {
 
 
   /*  完整Expander版本   */
-  def AMEStart(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool): Unit = {  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+  def AMEStart(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool , is_mlae8: Bool): Unit = {  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
     // dut.io.sigStart.poke(true.B)  //启动信号
 
     // 输入用户配置尺寸
@@ -193,6 +193,7 @@ object apply {
     //InsType_io信号
     dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
+    dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
 
     // dut.clock.step(1)
 
@@ -200,7 +201,7 @@ object apply {
   }
 
   def AMEStop(dut: AME): Unit = {
-    AMEStart(dut, 0, 0, 0, 0, 0, 0, 0, 0, false.B, false.B, false.B)
+    AMEStart(dut, 0, 0, 0, 0, 0, 0, 0, 0, false.B, false.B, false.B , false.B)
   }
 
 
@@ -228,7 +229,7 @@ object apply {
 
   /*  使用IssueQueen push   */
   //push进IssueQueen,同时step 1
-  def IssueQueen_Push_Step(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool): Unit = {  
+  def IssueQueen_Push_Step(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool , is_mlae8: Bool): Unit = {  
     // dut.io.sigStart.poke(true.B)  //启动信号
 
     // 输入用户配置尺寸
@@ -249,6 +250,7 @@ object apply {
     //InsType_io信号
     dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
+    dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
 
     dut.clock.step(1) //前进一个时钟,IssueQueen更新
 
@@ -256,7 +258,7 @@ object apply {
   }
 
   //push进IssueQueen,不step 1
-  def IssueQueen_Push_noStep(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool): Unit = {  
+  def IssueQueen_Push_noStep(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool , is_mlae8: Bool): Unit = {  
     
     // 输入用户配置尺寸
     dut.io.Uop_io.mtileConfig_io.mtilem.poke(mtilem.U)
@@ -276,6 +278,7 @@ object apply {
     //InsType_io信号
     dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
+    dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
 
   }
 
