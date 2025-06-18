@@ -95,7 +95,7 @@ object Consts {
 
 
   // Load / Store
-  val nRow_LEN = log2Ceil(8 + 1)   //这里后续还得调，先给个肯定够的
+  val nRow_LEN = log2Ceil(16 + 1)   //这里后续还得调，先给个肯定够的
   val nCol_LEN = log2Ceil(4 + 1)
   // val rs1_LEN = 16
   val rs1_LEN = 48

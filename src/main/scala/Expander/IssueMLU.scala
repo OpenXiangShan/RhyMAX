@@ -26,6 +26,7 @@ class IssueMLU extends Module{
 
   val reg_is_mlbe8 = RegInit(false.B)
   val reg_is_mlae8 = RegInit(false.B)
+  val reg_is_mlce32 = RegInit(false.B)
 
   when(io.IssueMLU_Excute_io.sigStart){//接到start信号，更新info
     reg_mtilem := io.IssueMLU_Excute_io.mtilem
@@ -37,6 +38,7 @@ class IssueMLU extends Module{
 
     reg_is_mlbe8 := io.IssueMLU_Excute_io.is_mlbe8
     reg_is_mlae8 := io.IssueMLU_Excute_io.is_mlae8
+    reg_is_mlce32 := io.IssueMLU_Excute_io.is_mlce32
   }
   // .otherwise{
   //   reg_mtilem := reg_mtilem
@@ -62,9 +64,9 @@ printf(p"[debug] MLU_sigStart = ${io.IssueMLU_Excute_io.sigStart}, " +
 
 
   /*    between Top and TileHandler    */
-  // subTileHandler.io.is_mlbe8 := io.IssueMLU_Excute_io.is_mlbe8 //被你害惨了
   subTileHandler.io.is_mlbe8 := reg_is_mlbe8
   subTileHandler.io.is_mlae8 := reg_is_mlae8
+  subTileHandler.io.is_mlce32 := reg_is_mlce32
 
   /*    between Top and regInfo    */
   //done above
@@ -73,6 +75,8 @@ printf(p"[debug] MLU_sigStart = ${io.IssueMLU_Excute_io.sigStart}, " +
   /*    between Top and FSM    */
   subFSM.io.sigStart := io.IssueMLU_Excute_io.sigStart
   subFSM.io.FSM_MLU_io <> io.FSM_MLU_io
+  subFSM.io.is_loadAB := reg_is_mlbe8 || reg_is_mlae8
+  subFSM.io.is_loadC := reg_is_mlce32
 
   io.IssueMLU_Excute_io.sigDone := subFSM.io.sigDone //!!!
   // io.IssueMLU_Excute_io.sigDone := subFSM.io.sigReqDone //for debug，暂时认为sigReqDone等同于done（不考虑L2的访存延时）

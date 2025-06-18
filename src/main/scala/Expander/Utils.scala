@@ -28,8 +28,9 @@ class Operands_IO extends Bundle{//操作数信息
 
 class InsType_IO extends Bundle{//指令类型
   val is_mmacc = Input(Bool())      //整型矩阵乘,signed 8bit, output quad-widen
-  val is_mlbe8 = Input(Bool())      //load指令,8-bit right tile load
-  val is_mlae8 = Input(Bool())      //load指令,8-bit left tile load
+  val is_mlbe8 = Input(Bool())      //load指令,8-bit right tile load(A)
+  val is_mlae8 = Input(Bool())      //load指令,8-bit left tile load(B)
+  val is_mlce32 = Input(Bool())      //load指令,32-bit Acc load(C)
 }
 
 
@@ -167,6 +168,9 @@ class FSM_MLU_IO extends Bundle{  //MLU的FSM，连接下层MLU接口
   val Cacheline_Read_io = Vec(8 , new Cacheline_Read_IO)  //对应8条cacheline
   val md = Output(UInt(Consts.All_ADDR_LEN.W))  //告知MLU该写入哪个寄存器
   val sigPortState = Output(Bool()) //告知MLU是否处于工作状态，用于Port的激活或注销
+  val is_loadAB = Output(Bool()) //是load A/B指令
+  val is_loadC = Output(Bool()) //是load C指令
+
 }
 
 class MLU_L2_IO extends Bundle{ //MLU访问L2
@@ -180,6 +184,8 @@ class IssueMLU_Excute_IO extends Bundle{//连接ExcuteHandler
   val sigStart = Input(Bool())    //启动信号
   val is_mlbe8 = Input(Bool())
   val is_mlae8 = Input(Bool())
+  val is_mlce32 = Input(Bool())
+  
   // val is_shaked = Input(Bool()) //是否握手成功
   val rs1 = Input(UInt(Consts.rs1_LEN.W))  //baseaddr
   val rs2 = Input(UInt(Consts.rs2_LEN.W))   //stride

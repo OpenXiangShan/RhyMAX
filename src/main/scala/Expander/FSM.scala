@@ -182,6 +182,9 @@ class FSM_MLU extends Module{ //MLU状态机
     val rs1 = Input(UInt(Consts.rs1_LEN.W))  
     val rs2 = Input(UInt(Consts.rs2_LEN.W))
     val md = Input(UInt(Consts.All_ADDR_LEN.W))
+    val is_loadAB = Input(Bool()) //是load A/B指令
+    val is_loadC = Input(Bool()) //是load C指令
+    
     val TileHandler_MLU_io = Flipped(new TileHandler_MLU_IO)  //padding后用于设置状态机
     val FSM_MLU_io = new FSM_MLU_IO //连接下层MLU
 
@@ -197,7 +200,7 @@ class FSM_MLU extends Module{ //MLU状态机
   val baseAddr = io.rs1
   val stride = io.rs2
 
-  //标记状态
+  /* 表示状态 */
   val regRow = RegInit(0.U(Consts.nRow_LEN.W))  //因为和nRow那里共用nRow_LEN，所以实际上多一位是浪费的
   val regCol = RegInit(0.U(Consts.nCol_LEN.W))
 
@@ -210,12 +213,34 @@ class FSM_MLU extends Module{ //MLU状态机
                 Mux(regRow === nRow - 1.U , regCol + 1.U , regCol)))
 
   /*  FSM_MLU_io  */
-  for(y <- 0 until 8){
-    io.FSM_MLU_io.Cacheline_Read_io(y).addr := baseAddr + (regRow * 8.U + y.U) * stride + regCol * 64.U
-    io.FSM_MLU_io.Cacheline_Read_io(y).id := Cat(regCol(1 , 0) , regRow(2 , 0))
+  for(y <- 0 until 8){  //default
+      io.FSM_MLU_io.Cacheline_Read_io(y).addr := 0.U
+      io.FSM_MLU_io.Cacheline_Read_io(y).id := 0.U
+  }
+
+
+
+
+  when(io.is_loadAB) {  //load A或load B类
+
+    for(y <- 0 until 8){
+      io.FSM_MLU_io.Cacheline_Read_io(y).addr := baseAddr + (regRow * 8.U + y.U) * stride + regCol * 64.U
+      io.FSM_MLU_io.Cacheline_Read_io(y).id := Cat(regCol(1 , 0) , regRow(2 , 0))
+    }
+    
+  }.elsewhen(io.is_loadC) { //load C类
+
+    for(y <- 0 until 8){
+      io.FSM_MLU_io.Cacheline_Read_io(y).addr := baseAddr + (regRow * 4.U + (y / 2).U ) * stride + 128.U * regCol + (y % 2).U * 64.U
+      io.FSM_MLU_io.Cacheline_Read_io(y).id := Cat(regCol(0) , regRow(3 , 0))
+    }
+
   }
 
   io.FSM_MLU_io.md := io.md
+  io.FSM_MLU_io.is_loadAB := io.is_loadAB
+  io.FSM_MLU_io.is_loadC := io.is_loadC
+
 
   /*  sigReqDone：L2读请求信号不再产生   */
   val wireReqDone = Mux(regRow === nRow - 1.U && regCol === nCol - 1.U , true.B , false.B)  //暂时先这么处理把
@@ -225,7 +250,7 @@ class FSM_MLU extends Module{ //MLU状态机
 
   /*  sigDone  */
   val wireDone = Wire(Bool())
-  val regCntDone = RegInit(VecInit(Seq.fill(8)(0.U(log2Ceil(8 * 4 * 8 + 1).W)))) //对应8条sigLineDone，用于计数，从0开始，计到nRow * nCol * 8 则满
+  val regCntDone = RegInit(VecInit(Seq.fill(8)(0.U(log2Ceil(32 * 8 + 1).W)))) //对应8条sigLineDone，用于计数，从0开始，计到nRow * nCol * 8 则满(以load A/B 8bit为例)
 
   for(i <- 0 until 8){
     when(io.sigStart || wireDone){  //启动时归0；Load结束后也归零，这样Done信号就不会一直拉高
@@ -241,14 +266,20 @@ printf(p"regCntDone($i) = ${regCntDone(i)} , io.FSM_MLU_io.sigLineDone($i) = ${i
   } 
 printf(p"nRow = $nRow , nCol = $nCol\n") 
 
-  val allDone = regCntDone.map(_ === (nRow * nCol * 8.U)).reduce(_ && _)   //均为nRow * nCol * 8
-  val allZero = regCntDone.map(_ === 0.U).reduce(_ && _)  //均为0
-  wireDone := allDone && !allZero   //所有regCntDone均为nRow * nCol * 8，则Load结束(该逻辑仅在Load执行期间生效，其余时间默认为false)
+  val allDone = Wire(Bool())
+  allDone := false.B
+  
+  when(io.is_loadAB) {
+    allDone := regCntDone.map(_ === (nRow * nCol * 8.U)).reduce(_ && _)   //均为nRow * nCol * 8(以load A/B 8bit为例)
+  }.elsewhen(io.is_loadC) {
+    allDone := regCntDone.map(_ === (nRow * nCol * 4.U)).reduce(_ && _)   //均为nRow * nCol * 4(以load C 32bit为例)
+  }
+  
 
-  // wireDone := regCntDone.map(_ === (nRow * nCol * 8.U)).reduce(_ && _)   //所有regCntDone均为nRow * nCol * 8，则Load结束(该逻辑仅在Load执行期间生效，其余时间默认为false)
+  val allZero = regCntDone.map(_ === 0.U).reduce(_ && _)  //均为0
+  wireDone := allDone && !allZero   //所有regCntDone均为nRow * nCol * 8(以load A/B 8bit为例)，则Load结束(该逻辑仅在Load执行期间生效，其余时间默认为false)
+
   io.sigDone := wireDone
-  // io.sigDone := io.FSM_MLU_io.sigDone //由MLU告知是否结束，并逐级向上传递
-  // io.sigDone := wireReqDone //!!!暂时等同于sigReqDone
 
 
 

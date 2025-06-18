@@ -172,7 +172,23 @@ object apply {
 
 
   /*  完整Expander版本   */
-  def AMEStart(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool , is_mlae8: Bool): Unit = {  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+  def AMEStart(
+    dut: AME,
+    mtilem: Int = 0,
+    mtilen: Int = 0,
+    mtilek: Int = 0,
+    ms1: Int = 0,
+    ms2: Int = 0,
+    md: Int = 0,
+    rs1: Int = 0,
+    rs2: Int = 0,
+    valid: Bool = false.B,
+    is_mmacc: Bool = false.B,
+    is_mlbe8: Bool = false.B,
+    is_mlae8: Bool = false.B,
+    is_mlce32: Bool = false.B
+  ): Unit = {  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
+
     // dut.io.sigStart.poke(true.B)  //启动信号
 
     // 输入用户配置尺寸
@@ -194,6 +210,7 @@ object apply {
     dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
     dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
+    dut.io.Uop_io.InsType_io.is_mlce32.poke(is_mlce32)
 
     // dut.clock.step(1)
 
@@ -229,7 +246,22 @@ object apply {
 
   /*  使用IssueQueen push   */
   //push进IssueQueen,同时step 1
-  def IssueQueen_Push_Step(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool , is_mlae8: Bool): Unit = {  
+  def IssueQueen_Push_Step(
+    dut: AME,
+    mtilem: Int = 0,
+    mtilen: Int = 0,
+    mtilek: Int = 0,
+    ms1: Int = 0,
+    ms2: Int = 0,
+    md: Int = 0,
+    rs1: Int = 0,
+    rs2: Int = 0,
+    valid: Bool = false.B,
+    is_mmacc: Bool = false.B,
+    is_mlbe8: Bool = false.B,
+    is_mlae8: Bool = false.B,
+    is_mlce32: Bool = false.B
+  ): Unit = {  
     // dut.io.sigStart.poke(true.B)  //启动信号
 
     // 输入用户配置尺寸
@@ -251,6 +283,7 @@ object apply {
     dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
     dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
+    dut.io.Uop_io.InsType_io.is_mlce32.poke(is_mlce32)
 
     dut.clock.step(1) //前进一个时钟,IssueQueen更新
 
@@ -258,7 +291,22 @@ object apply {
   }
 
   //push进IssueQueen,不step 1
-  def IssueQueen_Push_noStep(dut: AME , mtilem: Int , mtilen: Int , mtilek: Int , ms1: Int , ms2: Int , md: Int , rs1: Int , rs2: Int , valid: Bool , is_mmacc: Bool , is_mlbe8: Bool , is_mlae8: Bool): Unit = {  
+  def IssueQueen_Push_noStep(
+    dut: AME,
+    mtilem: Int = 0,
+    mtilen: Int = 0,
+    mtilek: Int = 0,
+    ms1: Int = 0,
+    ms2: Int = 0,
+    md: Int = 0,
+    rs1: Int = 0,
+    rs2: Int = 0,
+    valid: Bool = false.B,
+    is_mmacc: Bool = false.B,
+    is_mlbe8: Bool = false.B,
+    is_mlae8: Bool = false.B,
+    is_mlce32: Bool = false.B
+  ): Unit = {  
     
     // 输入用户配置尺寸
     dut.io.Uop_io.mtileConfig_io.mtilem.poke(mtilem.U)
@@ -279,6 +327,7 @@ object apply {
     dut.io.Uop_io.InsType_io.is_mmacc.poke(is_mmacc)
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
     dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
+    dut.io.Uop_io.InsType_io.is_mlce32.poke(is_mlce32)
 
   }
 
@@ -293,10 +342,10 @@ object apply {
             val addr_req = dut.io.MLU_L2_io.Cacheline_Read_io(i).addr.peek().litValue.toInt
             val id_req = dut.io.MLU_L2_io.Cacheline_Read_io(i).id.peek().litValue.toInt
 
-println(s"addr_req = ${addr_req} , id_req = ${id_req}")
+// println(s"addr_req = ${addr_req} , id_req = ${id_req}")
 
             val (readData, id) = L2Sim.readLine(addr_req, id_req)
-println(f"readData = 0x${readData.litValue}%0128X, id = $id")
+// println(f"readData = 0x${readData.litValue}%0128X, id = $id")
             dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).data.poke(readData)
             dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).id.poke(id)
             dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).valid.poke(true.B)

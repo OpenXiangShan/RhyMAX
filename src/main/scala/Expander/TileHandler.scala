@@ -12,6 +12,7 @@ class TileHandler_MLU extends Module {
   val io = IO(new Bundle {
     val is_mlbe8 = Input(Bool())
     val is_mlae8 = Input(Bool())
+    val is_mlce32 = Input(Bool())
     
     val mtileConfig_io = new mtileConfig_IO
     val TileHandler_MLU_io = new TileHandler_MLU_IO
@@ -37,10 +38,15 @@ class TileHandler_MLU extends Module {
     nRow := (io.mtileConfig_io.mtilem + 7.U) >> 3
     nCol := (io.mtileConfig_io.mtilek + 63.U) >> 6
 
+  }.elsewhen(io.is_mlce32) {
+
+    nRow := (io.mtileConfig_io.mtilem + 3.U) >> 2
+    nCol := (io.mtileConfig_io.mtilen + 31.U) >> 5
+
   }
 
 //debug
-printf(p"[TileHandler] io.is_mlbe8 = ${io.is_mlbe8} , io.is_mlae8 = ${io.is_mlae8}  \n") 
+printf(p"[TileHandler] io.is_mlbe8 = ${io.is_mlbe8} , io.is_mlae8 = ${io.is_mlae8} , io.is_mlce32 = ${io.is_mlce32} \n") 
 printf(p"[TileHandler] nRow = ${nRow} , nCol = ${nCol}  \n") 
 
   io.TileHandler_MLU_io.nRow := nRow

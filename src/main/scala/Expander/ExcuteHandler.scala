@@ -60,9 +60,11 @@ class ExcuteHandler extends Module {
 
   io.IssueMLU_Excute_io.is_mlbe8 := false.B
   io.IssueMLU_Excute_io.is_mlae8 := false.B
+  io.IssueMLU_Excute_io.is_mlce32 := false.B
+                                                          //新的指令加在空行中,由上往下
 
   val is_MLU_ins = Wire(Bool()) //指令为Load指令
-  is_MLU_ins := uop.InsType_io.is_mlbe8 || uop.InsType_io.is_mlae8
+  is_MLU_ins := uop.InsType_io.is_mlbe8 || uop.InsType_io.is_mlae8 || uop.InsType_io.is_mlce32
 
   // ----------- ready 信号仲裁 -----------
   val mma_ready = uop.InsType_io.is_mmacc && {
@@ -118,6 +120,8 @@ class ExcuteHandler extends Module {
 
     io.IssueMLU_Excute_io.is_mlbe8 := uop.InsType_io.is_mlbe8
     io.IssueMLU_Excute_io.is_mlae8 := uop.InsType_io.is_mlae8
+    io.IssueMLU_Excute_io.is_mlce32 := uop.InsType_io.is_mlce32
+
 
     when (is_shaked) {
       sb.writeMaskAlloc_RF   := (1.U << md)
