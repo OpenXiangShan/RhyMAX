@@ -186,7 +186,8 @@ object apply {
     is_mmacc: Bool = false.B,
     is_mlbe8: Bool = false.B,
     is_mlae8: Bool = false.B,
-    is_mlce32: Bool = false.B
+    is_mlce32: Bool = false.B,
+    is_msce32: Bool = false.B
   ): Unit = {  //启动AME，配置矩阵形状，确定操作数矩阵标号（ABC标号范围均是0～7)
 
     // dut.io.sigStart.poke(true.B)  //启动信号
@@ -211,6 +212,7 @@ object apply {
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
     dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
     dut.io.Uop_io.InsType_io.is_mlce32.poke(is_mlce32)
+    dut.io.Uop_io.InsType_io.is_msce32.poke(is_msce32)
 
     // dut.clock.step(1)
 
@@ -260,7 +262,8 @@ object apply {
     is_mmacc: Bool = false.B,
     is_mlbe8: Bool = false.B,
     is_mlae8: Bool = false.B,
-    is_mlce32: Bool = false.B
+    is_mlce32: Bool = false.B,
+    is_msce32: Bool = false.B
   ): Unit = {  
     // dut.io.sigStart.poke(true.B)  //启动信号
 
@@ -284,6 +287,7 @@ object apply {
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
     dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
     dut.io.Uop_io.InsType_io.is_mlce32.poke(is_mlce32)
+    dut.io.Uop_io.InsType_io.is_msce32.poke(is_msce32)
 
     dut.clock.step(1) //前进一个时钟,IssueQueen更新
 
@@ -305,7 +309,8 @@ object apply {
     is_mmacc: Bool = false.B,
     is_mlbe8: Bool = false.B,
     is_mlae8: Bool = false.B,
-    is_mlce32: Bool = false.B
+    is_mlce32: Bool = false.B,
+    is_msce32: Bool = false.B
   ): Unit = {  
     
     // 输入用户配置尺寸
@@ -328,6 +333,7 @@ object apply {
     dut.io.Uop_io.InsType_io.is_mlbe8.poke(is_mlbe8)
     dut.io.Uop_io.InsType_io.is_mlae8.poke(is_mlae8)
     dut.io.Uop_io.InsType_io.is_mlce32.poke(is_mlce32)
+    dut.io.Uop_io.InsType_io.is_msce32.poke(is_msce32)
 
   }
 
@@ -360,6 +366,91 @@ object apply {
         for(i <- 0 until 8){  //最后validq确保false,防止误读L2数据
         dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).valid.poke(false.B)
       }
+  }
+
+
+
+  def L2_store_check_step(dut: AME ): Unit = {//检查AME写进L2的数据是否正确
+
+    for(i <- 0 until 2){//两条cacheline
+      dut.io.MSU_L2_io.Cacheline_Write_io(i).ready.poke(true.B)  //L2始终就绪
+
+      if(dut.io.MSU_L2_io.Cacheline_Write_io(i).valid.peek().litToBoolean){//写L2数据有效
+        val addr_w = dut.io.MSU_L2_io.Cacheline_Write_io(i).addr.peek().litValue.toInt //尝试写入的地址
+        val data_w = dut.io.MSU_L2_io.Cacheline_Write_io(i).data.peek().litValue  //尝试写入的数据
+
+        val (l2DataUInt, id) = L2Sim.readLine(addr_w, 0)
+        val l2Data = l2DataUInt.litValue  // 从 UInt(512.W) 取 BigInt
+
+        val status = if (l2Data == data_w) "PASS" else "FAILED"
+
+        
+        println(s"[L2 WRITE CHECK] addr = $addr_w, data_w = 0x${data_w.toString(16)}, l2Data = 0x${l2Data.toString(16)} [$status]")
+        
+        dut.io.MSU_L2_io.Cacheline_WriteBack_io(i).valid.poke(true.B)
+
+      }else{
+        dut.io.MSU_L2_io.Cacheline_WriteBack_io(i).valid.poke(false.B)
+      }
+    }
+
+    dut.clock.step(1)
+    
+  }
+
+  def LS_check_step(dut: AME ): Unit = {//包含load指令和store指令,同时会检查store的正确性
+
+    //Load
+    for(i <- 0 until 8){//8条cacheline
+          dut.io.MLU_L2_io.Cacheline_Read_io(i).ready.poke(true.B)  //L2始终就绪
+
+          if(dut.io.MLU_L2_io.Cacheline_Read_io(i).valid.peek().litToBoolean){//对L2读请求有意义
+            val addr_req = dut.io.MLU_L2_io.Cacheline_Read_io(i).addr.peek().litValue.toInt
+            val id_req = dut.io.MLU_L2_io.Cacheline_Read_io(i).id.peek().litValue.toInt
+
+// println(s"addr_req = ${addr_req} , id_req = ${id_req}")
+
+            val (readData, id) = L2Sim.readLine(addr_req, id_req)
+// println(f"readData = 0x${readData.litValue}%0128X, id = $id")
+            dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).data.poke(readData)
+            dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).id.poke(id)
+            dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).valid.poke(true.B)
+          }else{
+            dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).valid.poke(false.B)
+          }
+        }
+
+    //Store
+    for(i <- 0 until 2){//两条cacheline
+      dut.io.MSU_L2_io.Cacheline_Write_io(i).ready.poke(true.B)  //L2始终就绪
+
+      if(dut.io.MSU_L2_io.Cacheline_Write_io(i).valid.peek().litToBoolean){//写L2数据有效
+        val addr_w = dut.io.MSU_L2_io.Cacheline_Write_io(i).addr.peek().litValue.toInt //尝试写入的地址
+        val data_w = dut.io.MSU_L2_io.Cacheline_Write_io(i).data.peek().litValue  //尝试写入的数据
+
+        val (l2DataUInt, id) = L2Sim.readLine(addr_w, 0)
+        val l2Data = l2DataUInt.litValue  // 从 UInt(512.W) 取 BigInt
+
+        val status = if (l2Data == data_w) "PASS" else "FAILED"
+
+        
+        println(s"[L2 WRITE CHECK] addr = $addr_w, data_w = 0x${data_w.toString(16)}, l2Data = 0x${l2Data.toString(16)} [$status]")
+        
+        dut.io.MSU_L2_io.Cacheline_WriteBack_io(i).valid.poke(true.B)
+
+      }else{
+        dut.io.MSU_L2_io.Cacheline_WriteBack_io(i).valid.poke(false.B)
+      }
+    }
+
+
+    dut.clock.step(1)
+
+
+
+    for(i <- 0 until 8){  //最后validq确保false,防止误读L2数据
+        dut.io.MLU_L2_io.Cacheline_ReadBack_io(i).valid.poke(false.B)
+    }
   }
 }
 

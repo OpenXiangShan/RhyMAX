@@ -57,9 +57,9 @@ class IssueMLU extends Module{
 //        p"rs2=${io.IssueMLU_Excute_io.rs2}, in_md=${io.IssueMLU_Excute_io.in_md}\n")
 
 
-printf(p"[debug] MLU_sigStart = ${io.IssueMLU_Excute_io.sigStart}, " +
-       p"mtilem=${reg_mtilem}, mtilen=${reg_mtilen}, " +
-       p"mtilek=${reg_mtilek}\n")
+// printf(p"[debug] MLU_sigStart = ${io.IssueMLU_Excute_io.sigStart}, " +
+//        p"mtilem=${reg_mtilem}, mtilen=${reg_mtilen}, " +
+//        p"mtilek=${reg_mtilek}\n")
 
 
 

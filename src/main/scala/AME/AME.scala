@@ -11,6 +11,7 @@ import Expander._
 import ScoreBoard._
 import MLU._
 import IssueQueen._
+import MSU._
 
 
 
@@ -31,7 +32,8 @@ class AME extends Module {
     val writeAll = new RegFileAllWrite_IO  //通用读端口
     val readAll = new RegFileAllRead_IO  //通用写端口
 
-    val MLU_L2_io = new MLU_L2_IO   //访问L2
+    val MLU_L2_io = new MLU_L2_IO   //读L2
+    val MSU_L2_io = new MSU_L2_IO   //写L2
 
 
     val sigDone = Output(Bool())    // for debug
@@ -43,6 +45,7 @@ class AME extends Module {
   val subScoreBoard = Module(new ScoreBoard)
   val subMLU = Module(new MLU)
   val subIssueQueen = Module(new IssueQueen)
+  val subMSU = Module(new MSU)
 
   /*  for debug   */
   io.sigDone := subExpander.io.sigDone
@@ -68,6 +71,9 @@ class AME extends Module {
 
   /*  between Top and IssueQueen  */
   io.Uop_io <> subIssueQueen.io.Uop_In_io
+
+  /*  between Top and MSU  */
+  io.MSU_L2_io <> subMSU.io.MSU_L2_io
 
 
   /*  between MMAU and RegFile  */
@@ -112,9 +118,8 @@ class AME extends Module {
   subMMAU.io.FSM_MMAU_io <> subExpander.io.FSM_MMAU_io
 
   /*  between MMAU and ScoreBoard  */
-  // nothing
-
   /*  between MMAU and MLU  */
+  /*  between MMAU and MSU  */
   // nothing
 
   /*  between RegFile and MLU  */
@@ -122,10 +127,11 @@ class AME extends Module {
 
 
   /*  between RegFile and Expander  */
-  // nothing
-
   /*  between RegFile and ScoreBoard  */
   // nothing
+
+  /*  between RegFile and MSU  */
+  subRegFile.io.readAll(0) <> subMSU.io.RegFileAllRead_io
 
   /*  between Expander and ScoreBoard  */
   subExpander.io.ScoreboardVisit_io <> subScoreBoard.io.ScoreboardVisit_io
@@ -135,6 +141,9 @@ class AME extends Module {
 
   /*  between Expander and IssueQueen  */
   subIssueQueen.io.Uop_Out_io <> subExpander.io.Uop_io
+
+  /*  between Expander and MSU  */
+  subMSU.io.FSM_MSU_io <> subExpander.io.FSM_MSU_io
 
   /*  between ScoreBoard and MLU  */
   //nothing

@@ -20,6 +20,7 @@ class IssueQueen extends Module {
     io.Uop_In_io.mtileConfig_io.mtilen,
     io.Uop_In_io.mtileConfig_io.mtilem,
                                                         //新的指令加在空行中,由下往上
+    io.Uop_In_io.InsType_io.is_msce32,                                                     
     io.Uop_In_io.InsType_io.is_mlce32,       
     io.Uop_In_io.InsType_io.is_mlae8,
     io.Uop_In_io.InsType_io.is_mlbe8,
@@ -35,7 +36,7 @@ class IssueQueen extends Module {
   val totalWidth = log2Ceil(Consts.tileK + 1) +
                    log2Ceil(Consts.tileN + 1) +
                    log2Ceil(Consts.tileM + 1) +
-                   1 + 1 + 1 + 1 +                   //新指令添加则"+1"
+                   1 + 1 + 1 + 1 + 1 +                  //新指令添加则"+1"
                    Consts.rs2_LEN +
                    Consts.rs1_LEN +
                    Consts.All_ADDR_LEN * 3
@@ -60,8 +61,9 @@ class IssueQueen extends Module {
   val is_mlbe8Offset = is_mmaccOffset + 1
   val is_mlae8Offset = is_mlbe8Offset + 1
   val is_mlce32Offset = is_mlae8Offset + 1
+  val is_msce32Offset = is_mlce32Offset + 1
                                                           //新的指令加在空行中,由上往下
-  val mtilemOffset = is_mlce32Offset + 1
+  val mtilemOffset = is_msce32Offset + 1
   val mtilenOffset = mtilemOffset + log2Ceil(Consts.tileM + 1)
   val mtilekOffset = mtilenOffset + log2Ceil(Consts.tileN + 1)
 
@@ -74,6 +76,7 @@ class IssueQueen extends Module {
   io.Uop_Out_io.InsType_io.is_mlbe8  := deq_data(is_mlbe8Offset).asBool
   io.Uop_Out_io.InsType_io.is_mlae8  := deq_data(is_mlae8Offset).asBool
   io.Uop_Out_io.InsType_io.is_mlce32  := deq_data(is_mlce32Offset).asBool
+  io.Uop_Out_io.InsType_io.is_msce32  := deq_data(is_msce32Offset).asBool
                                                                                 //新的指令加在空行中,由上往下
   io.Uop_Out_io.mtileConfig_io.mtilem := deq_data(mtilemOffset + log2Ceil(Consts.tileM + 1) - 1, mtilemOffset)
   io.Uop_Out_io.mtileConfig_io.mtilen := deq_data(mtilenOffset + log2Ceil(Consts.tileN + 1) - 1, mtilenOffset)

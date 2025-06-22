@@ -174,8 +174,6 @@ class FSM_MMAU extends MMAUFormat{
 
 
 
-
-
 class FSM_MLU extends Module{ //MLU状态机
   val io = IO(new Bundle {
     val sigStart = Input(Bool())    //启动信号
@@ -242,9 +240,7 @@ class FSM_MLU extends Module{ //MLU状态机
   io.FSM_MLU_io.is_loadC := io.is_loadC
 
 
-  /*  sigReqDone：L2读请求信号不再产生   */
-  val wireReqDone = Mux(regRow === nRow - 1.U && regCol === nCol - 1.U , true.B , false.B)  //暂时先这么处理把
-  // io.sigReqDone := wireReqDone
+  
 
 
 
@@ -262,9 +258,9 @@ class FSM_MLU extends Module{ //MLU状态机
     }
 
 //debug
-printf(p"regCntDone($i) = ${regCntDone(i)} , io.FSM_MLU_io.sigLineDone($i) = ${io.FSM_MLU_io.sigLineDone(i)}\n")  
+// printf(p"regCntDone($i) = ${regCntDone(i)} , io.FSM_MLU_io.sigLineDone($i) = ${io.FSM_MLU_io.sigLineDone(i)}\n")  
   } 
-printf(p"nRow = $nRow , nCol = $nCol\n") 
+// printf(p"nRow = $nRow , nCol = $nCol\n") 
 
   val allDone = Wire(Bool())
   allDone := false.B
@@ -287,6 +283,7 @@ printf(p"nRow = $nRow , nCol = $nCol\n")
 
   /*  valid   */
   val regL2State = RegInit(false.B)  //指示L2是否为工作状态，影响访问L2信号valid是否有效
+  val wireReqDone = Mux(regRow === nRow - 1.U && regCol === nCol - 1.U , true.B , false.B)  //暂时先这么处理把
 
   when(io.sigStart){
     regL2State := true.B
@@ -317,6 +314,131 @@ printf(p"nRow = $nRow , nCol = $nCol\n")
   //   printf(p"$i : addr = ${io.FSM_MLU_io.Cacheline_Read_io(i).addr} , id = ${io.FSM_MLU_io.Cacheline_Read_io(i).id}\n")
   // }
   // printf(p"\n\n")
+
+
+
+}
+
+
+
+
+
+
+
+class FSM_MSU extends Module {
+  val io = IO(new Bundle {
+    val sigStart = Input(Bool())    //启动信号
+    val rs1 = Input(UInt(Consts.rs1_LEN.W))  
+    val rs2 = Input(UInt(Consts.rs2_LEN.W))
+    val md = Input(UInt(Consts.All_ADDR_LEN.W))
+
+    val is_storeC = Input(Bool()) //是store C指令
+    
+    val TileHandler_MSU_io = Flipped(new TileHandler_MSU_IO)  //padding后用于设置状态机
+    val FSM_MSU_io = new FSM_MSU_IO //连接下层MSU
+
+    val sigDone = Output(Bool()) //Store完成的信号，拉高再拉低
+  })
+
+
+  /*  TileHandler_MSU_io  */
+  val nRow = io.TileHandler_MSU_io.nRow 
+  val nCol = io.TileHandler_MSU_io.nCol 
+
+  /*  op  */
+  val baseAddr = io.rs1
+  val stride = io.rs2
+
+  /* 表示状态 */
+  val regRow = RegInit(0.U(Consts.nRow_LEN.W))  //因为和nRow那里共用nRow_LEN，所以实际上多一位是浪费的
+  val regCol = RegInit(0.U(Consts.nCol_LEN.W))
+
+
+  regRow := Mux(io.sigStart , 0.U , 
+              Mux(regRow === nRow - 1.U , 0.U , regRow + 1.U))
+
+  regCol := Mux(io.sigStart , 0.U , 
+              Mux(regCol === nCol - 1.U && regRow === nRow - 1.U, 0.U , 
+                Mux(regRow === nRow - 1.U , regCol + 1.U , regCol)))
+
+  /*  FSM_MSU_io  */
+  for(y <- 0 until 2){
+    io.FSM_MSU_io.FSM_MSU_Output_io(y).addr := 0.U
+    io.FSM_MSU_io.FSM_MSU_Output_io(y).index := 0.U
+    io.FSM_MSU_io.FSM_MSU_Output_io(y).valid := false.B
+  }
+
+
+  when(io.is_storeC) {
+
+    for(y <- 0 until 2){
+      io.FSM_MSU_io.FSM_MSU_Output_io(y).addr := baseAddr + regRow * stride + regCol * 128.U + 64.U * y.U
+
+      when(regRow < 32.U && regCol === 0.U) {//区域1
+        io.FSM_MSU_io.FSM_MSU_Output_io(y).index := regRow
+      }.elsewhen(regRow >= 32.U && regCol === 1.U) {//区域4
+        io.FSM_MSU_io.FSM_MSU_Output_io(y).index := regRow + 64.U
+      }.otherwise {//区域2,3
+        io.FSM_MSU_io.FSM_MSU_Output_io(y).index := regRow + 32.U
+      }
+    }
+    
+  }
+
+  io.FSM_MSU_io.md := io.md
+  io.FSM_MSU_io.is_storeC := io.is_storeC
+
+
+  /*  valid   */
+  val regL2State = RegInit(false.B)  //指示L2是否为工作状态，影响访问L2信号valid是否有效
+  val wireReqDone = Mux(regRow === nRow - 1.U && regCol === nCol - 1.U , true.B , false.B)  //暂时先这么处理把
+
+  when(io.sigStart){
+    regL2State := true.B
+  }.elsewhen(wireReqDone){
+    regL2State := false.B
+  }
+
+  for(y <- 0 until 2){
+    io.FSM_MSU_io.FSM_MSU_Output_io(y).valid := regL2State
+  }
+
+  io.FSM_MSU_io.sigPortState := regL2State  //RF的激活注销,这里可以共用
+
+
+
+  /*  sigDone  */
+  val wireDone = Wire(Bool())
+  val regCntDone = RegInit(VecInit(Seq.fill(2)(0.U(log2Ceil(128 + 1).W)))) //对应2条sigLineDone，用于计数，从0开始，计到nRow * nCol  则满(以load C为例)
+
+  for(i <- 0 until 2){
+    when(io.sigStart || wireDone){  //启动时归0；Load结束后也归零，这样Done信号就不会一直拉高
+      regCntDone(i) := 0.U
+    }.elsewhen(io.FSM_MSU_io.sigLineDone(i)){ //由MSU告知成功写入一条数据，则+1
+      regCntDone(i) := regCntDone(i) + 1.U
+    }.otherwise{  //其他情况不变
+      regCntDone(i) := regCntDone(i)
+    }
+  }
+
+//debug
+// printf(p"regCntDone($i) = ${regCntDone(i)} , io.FSM_MSU_io.sigLineDone($i) = ${io.FSM_MSU_io.sigLineDone(i)}\n")  
+//   } 
+// printf(p"nRow = $nRow , nCol = $nCol\n") 
+
+  val allDone = Wire(Bool())
+  allDone := false.B
+
+  when(io.is_storeC) {
+    allDone := regCntDone.map(_ === (nRow * nCol)).reduce(_ && _)  //均为nRow * nCol
+  }
+  
+  val allZero = regCntDone.map(_ === 0.U).reduce(_ && _)  //均为0
+
+  wireDone := allDone && !allZero   //计数到达,同时排除全为0的情况(此时一般不在Store指令执行期间)
+
+  io.sigDone := wireDone
+
 
 
 

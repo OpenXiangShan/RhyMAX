@@ -102,6 +102,7 @@ object Consts {
   val rs2_LEN = 16
   // val L2_ADDR_LEN = 16
   val L2_ADDR_LEN = 48
+  val L2_DATA_LEN = 64 * 8  //cacheline,64B
   val L2_ID_LEN = 5
 
 

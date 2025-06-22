@@ -65,7 +65,7 @@ class MLU extends Module{
         val valid = io.MLU_L2_io.Cacheline_ReadBack_io(y).valid
         val indata = io.MLU_L2_io.Cacheline_ReadBack_io(y).data
 
-printf(p"y=$y: id=${id}, valid=${valid}, data=0x${Hexadecimal(indata)}\n")
+// printf(p"y=$y: id=${id}, valid=${valid}, data=0x${Hexadecimal(indata)}\n")
 
         when(io.FSM_MLU_io.is_loadAB) {//每个MultiInputBuffer对应一个Cacheline
 
@@ -74,7 +74,7 @@ printf(p"y=$y: id=${id}, valid=${valid}, data=0x${Hexadecimal(indata)}\n")
                 subMultiInputBuffer(y).io.in(i) := wireSplit(y)(i)
                 subMultiInputBuffer(y).io.in_valid(i) := valid  //有效
 
-printf(p"[debug] y=$y: 0x${Hexadecimal(subMultiInputBuffer(y).io.in(i)(68 , 5))}, ${subMultiInputBuffer(y).io.in_valid(i)}\n")
+// printf(p"[debug] y=$y: 0x${Hexadecimal(subMultiInputBuffer(y).io.in(i)(68 , 5))}, ${subMultiInputBuffer(y).io.in_valid(i)}\n")
             }
 
         }.elsewhen(io.FSM_MLU_io.is_loadC) {//每个MultiInputBuffer对应一个Bank
@@ -130,7 +130,7 @@ printf(p"[debug] y=$y: 0x${Hexadecimal(subMultiInputBuffer(y).io.in(i)(68 , 5))}
             val offset = Wire(UInt(Consts.All_INDEX_LEN.W))
             offset := output(71 , 69)    //偏移量，加上index才是真正的地址
 
-printf(p"[DEBUG12345] outdata = 0x${Hexadecimal(outdata)} , readvalid = $readvalid\n")
+// printf(p"[DEBUG12345] outdata = 0x${Hexadecimal(outdata)} , readvalid = $readvalid\n")
 
             for (i <- 0 until 4) {//对每条特定的cacheline，仅有4个路由目标
                 when(bankId === (i * 8 + y).U) { //！！！
@@ -139,10 +139,10 @@ printf(p"[DEBUG12345] outdata = 0x${Hexadecimal(outdata)} , readvalid = $readval
                     io.RegFileAllWrite_io.w(i * 8 + y).req.valid := readvalid
 
                                     // // debug
-printf(p"[DEBUGGGG] y = $y -> bankId = $bankId\n")
-printf(p"[DEBUGGGG] WritePort[${i * 8 + y}] setIdx = 0x${Hexadecimal(io.RegFileAllWrite_io.w({i * 8 + y}).req.bits.setIdx)}\n")
-printf(p"[DEBUGGGG] WritePort[${i * 8 + y}] data = 0x${Hexadecimal(io.RegFileAllWrite_io.w({i * 8 + y}).req.bits.data.head.asUInt)}\n")
-printf(p"[DEBUGGGG] WritePort[${i * 8 + y}] valid  = ${io.RegFileAllWrite_io.w({i * 8 + y}).req.valid}\n")
+// printf(p"[DEBUGGGG] y = $y -> bankId = $bankId\n")
+// printf(p"[DEBUGGGG] WritePort[${i * 8 + y}] setIdx = 0x${Hexadecimal(io.RegFileAllWrite_io.w({i * 8 + y}).req.bits.setIdx)}\n")
+// printf(p"[DEBUGGGG] WritePort[${i * 8 + y}] data = 0x${Hexadecimal(io.RegFileAllWrite_io.w({i * 8 + y}).req.bits.data.head.asUInt)}\n")
+// printf(p"[DEBUGGGG] WritePort[${i * 8 + y}] valid  = ${io.RegFileAllWrite_io.w({i * 8 + y}).req.valid}\n")
                 }.otherwise {
                     io.RegFileAllWrite_io.w(i * 8 + y).req.bits.setIdx := 0.U
                     io.RegFileAllWrite_io.w(i * 8 + y).req.bits.data.head := 0.U

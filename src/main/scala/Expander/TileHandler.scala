@@ -7,6 +7,47 @@ import common._
 import MMAU._
 
 
+
+
+//用于处理MSU Tile各维度相关参数
+class TileHandler_MSU extends Module {
+  val io = IO(new Bundle {
+    val is_msce32 = Input(Bool())
+    
+    val mtileConfig_io = new mtileConfig_IO
+    val TileHandler_MSU_io = new TileHandler_MSU_IO
+  })
+
+  // 默认输出为 0
+
+  val nRow = Wire(UInt(7.W))
+  val nCol = Wire(UInt(Consts.nCol_LEN.W))
+
+  nRow := 0.U
+  nCol := 0.U
+
+  when(io.is_msce32) {
+
+    nRow := io.mtileConfig_io.mtilem
+    nCol := (io.mtileConfig_io.mtilen + 31.U) >> 5
+
+  }
+
+//debug
+printf(p"[TileHandler_MSU] io.is_msce32 = ${io.is_msce32} \n") 
+printf(p"[TileHandler_MSU] nRow = ${nRow} , nCol = ${nCol}  \n") 
+
+  io.TileHandler_MSU_io.nRow := nRow
+  io.TileHandler_MSU_io.nCol := nCol
+}
+
+
+
+
+
+
+
+
 //用于处理MLU Tile各维度相关参数
 class TileHandler_MLU extends Module {
   val io = IO(new Bundle {
@@ -46,8 +87,8 @@ class TileHandler_MLU extends Module {
   }
 
 //debug
-printf(p"[TileHandler] io.is_mlbe8 = ${io.is_mlbe8} , io.is_mlae8 = ${io.is_mlae8} , io.is_mlce32 = ${io.is_mlce32} \n") 
-printf(p"[TileHandler] nRow = ${nRow} , nCol = ${nCol}  \n") 
+// printf(p"[TileHandler] io.is_mlbe8 = ${io.is_mlbe8} , io.is_mlae8 = ${io.is_mlae8} , io.is_mlce32 = ${io.is_mlce32} \n") 
+// printf(p"[TileHandler] nRow = ${nRow} , nCol = ${nCol}  \n") 
 
   io.TileHandler_MLU_io.nRow := nRow
   io.TileHandler_MLU_io.nCol := nCol

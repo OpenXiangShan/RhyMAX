@@ -28,9 +28,12 @@ class Operands_IO extends Bundle{//操作数信息
 
 class InsType_IO extends Bundle{//指令类型
   val is_mmacc = Input(Bool())      //整型矩阵乘,signed 8bit, output quad-widen
+
   val is_mlbe8 = Input(Bool())      //load指令,8-bit right tile load(A)
   val is_mlae8 = Input(Bool())      //load指令,8-bit left tile load(B)
   val is_mlce32 = Input(Bool())      //load指令,32-bit Acc load(C)
+
+  val is_msce32 = Input(Bool())      //store指令,32-bit Acc store(C)
 }
 
 
@@ -92,6 +95,11 @@ class TileHandler_MLU_IO extends Bundle{
   val nCol = Output(UInt(Consts.nCol_LEN.W))
 }
 
+
+class TileHandler_MSU_IO extends Bundle{
+  val nRow = Output(UInt(7.W))
+  val nCol = Output(UInt(Consts.nCol_LEN.W))
+}
 
 
 
@@ -190,6 +198,64 @@ class IssueMLU_Excute_IO extends Bundle{//连接ExcuteHandler
   val rs1 = Input(UInt(Consts.rs1_LEN.W))  //baseaddr
   val rs2 = Input(UInt(Consts.rs2_LEN.W))   //stride
   val in_md = Input(UInt(Consts.All_ADDR_LEN.W))
+  val mtilem = Input(UInt(log2Ceil(Consts.tileM+1).W))    //用户配置m维度长度
+  val mtilen = Input(UInt(log2Ceil(Consts.tileN+1).W))    //用户配置n维度长度
+  val mtilek = Input(UInt(log2Ceil(Consts.tileK+1).W))    //用户配置k维度长度
+
+  val sigDone = Output(Bool())    //结束信号
+  val out_md = Output(UInt(Consts.All_ADDR_LEN.W))  //结束时用于回收
+}
+
+
+
+
+
+/*    MSU   */
+class Cacheline_Write_IO extends Bundle { //向L2发送写请求（单条cacheline）
+  val ready = Input(Bool())   //标志L2是否就绪,即反压信号
+
+  val addr = Output(UInt(Consts.L2_ADDR_LEN.W))
+  val data = Output(UInt(Consts.L2_DATA_LEN.W))
+  val valid = Output(Bool())  //指示当前产生的写请求是否有意义
+
+}
+
+class Cacheline_WriteBack_IO extends Bundle{ //写L2的Ack（单条cacheline）
+  val valid = Input(Bool()) //即"ReleaseACK",若为true,说明成功写入一次
+}
+
+class MSU_L2_IO extends Bundle{ //MSU访问L2
+  val Cacheline_Write_io = Vec(2 , new Cacheline_Write_IO)
+  val Cacheline_WriteBack_io = Vec(2 , new Cacheline_WriteBack_IO)
+}
+
+class FSM_MSU_Output_IO extends Bundle {  //MSU状态机直接输出信号
+  val addr = Output(UInt(Consts.L2_ADDR_LEN.W))
+  val valid = Output(Bool())  //指示当前产生的写请求是否有意义
+  val index = Output(UInt(Consts.All_INDEX_LEN.W))  //寄存器寻址深度
+}
+
+
+class FSM_MSU_IO extends Bundle{  //MSU的FSM，连接下层MSU接口
+  // val sigDone = Input(Bool()) //由MSU告知上级Load是否完成
+  val sigLineDone = Input(Vec(2, Bool()))  //每条Cacheline对应的写入RF，每成功写入一次数据，则上报一次
+
+  val FSM_MSU_Output_io = Vec(2 , new FSM_MSU_Output_IO)  //状态机输出信号
+  val md = Output(UInt(Consts.All_ADDR_LEN.W))  //告知MSU该写入哪个寄存器
+  val sigPortState = Output(Bool()) //告知MSU是否处于工作状态，用于Port的激活或注销
+  val is_storeC = Output(Bool()) //是store C指令
+
+}
+
+//IssueMSU
+
+class IssueMSU_Excute_IO extends Bundle {
+  val sigStart = Input(Bool())    //启动信号
+  val is_msce32 = Input(Bool())
+
+  val rs1 = Input(UInt(Consts.rs1_LEN.W))  //baseaddr
+  val rs2 = Input(UInt(Consts.rs2_LEN.W))   //stride
+  val in_md = Input(UInt(Consts.All_ADDR_LEN.W))  //告知寄存器编号
   val mtilem = Input(UInt(log2Ceil(Consts.tileM+1).W))    //用户配置m维度长度
   val mtilen = Input(UInt(log2Ceil(Consts.tileN+1).W))    //用户配置n维度长度
   val mtilek = Input(UInt(log2Ceil(Consts.tileK+1).W))    //用户配置k维度长度

@@ -81,9 +81,54 @@ class AMETest_allIns_usingQueen extends AnyFreeSpec with Matchers {
 
 
 
+//AME完整测试，仅测store C指令，使用IssueQueen
+class AMETest_storeC_usingQueen extends AnyFreeSpec with Matchers {
+
+  "AMETest_storeC_usingQueen should PASS" in {
+    simulate(new AME) { dut =>
+
+      L2Sim.loadDataFrom(L2TestData.L2_Data, 0)//初始化L2
+
+      dut.clock.step(1) //等待上电稳定
+
+      // AME.apply.writeTestDataToAll(RFTestData.C, 4, dut)  //外部手动写入C
+
+      // AME.apply.readTestDataFromAll(RFTestData.C, 4, dut)
 
 
-//AME完整测试，仅测load B指令，使用IssueQueen
+      // (AME , mtilem , mtilen , mtilek , ms1 , ms2 , md , rs1 , rs2 , valid , is_mmacc , is_mlbe8 , is_mlae8)
+      AME.apply.IssueQueen_Push_noStep(dut = dut, mtilem = 30, mtilen = 30, mtilek = 200, md = 4, rs1 = 0, rs2 = 512, valid = true.B, is_mlce32 = true.B)  //全尺寸
+      AME.apply.LS_check_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      AME.apply.IssueQueen_Push_noStep(dut = dut, mtilem = 30, mtilen = 30, mtilek = 200, md = 4, rs1 = 0, rs2 = 512, valid = true.B, is_msce32 = true.B)  //全尺寸
+      AME.apply.LS_check_step(dut)  //step 1(load指令专用),由于这里L2是手动装填,所以不能用普通的step,否则会丢数据
+
+      
+
+
+      dut.io.Uop_io.ShakeHands_io.valid.poke(false.B)//结束
+      
+ 
+      var cycleCountMLU = 0
+
+
+// println(s"ins 1 excuting")
+
+      while(!dut.io.sigDone.peek().litToBoolean){ //等到执行完毕
+        AME.apply.LS_check_step(dut)
+        cycleCountMLU += 1
+      }
+
+      // AME.apply.L2_store_check_step(dut)
+      // cycleCountMLU += 1
+
+
+    }
+  }
+}
+
+
+//AME完整测试，仅测load C指令，使用IssueQueen
 class AMETest_loadC_usingQueen extends AnyFreeSpec with Matchers {
 
   "AMETest_loadC_usingQueen should PASS" in {

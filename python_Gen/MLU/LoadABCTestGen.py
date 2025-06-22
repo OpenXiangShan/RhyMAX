@@ -18,9 +18,12 @@ n = 32
 k = 8
 
 # 用户配置矩阵尺寸
-mtilem = 64
-mtilen = 64
-mtilek = 256
+# mtilem = 64
+# mtilen = 64
+# mtilek = 256
+mtilem = 30
+mtilen = 30
+mtilek = 200
 
 numM = tileM // m
 numN = tileN // n

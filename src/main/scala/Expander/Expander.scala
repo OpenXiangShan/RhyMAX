@@ -16,6 +16,7 @@ class Expander extends Module{
 
       val FSM_MMAU_io = Flipped(new FSM_MMAU_IO)
       val FSM_MLU_io = new FSM_MLU_IO
+      val FSM_MSU_io = new FSM_MSU_IO
 
       val sigDone = Output(Bool())    //for debug
     })
@@ -25,10 +26,12 @@ class Expander extends Module{
     val subExcuteHandler = Module(new ExcuteHandler)
     val subIssueMMAU = Module(new IssueMMAU)
     val subIssueMLU = Module(new IssueMLU)
+    val subIssueMSU = Module(new IssueMSU)
 
     /*  for debug   */
     // io.sigDone := subIssueMMAU.io.IssueMMAU_Excute_io.sigDone
-    io.sigDone := subIssueMLU.io.IssueMLU_Excute_io.sigDone
+    // io.sigDone := subIssueMLU.io.IssueMLU_Excute_io.sigDone
+    io.sigDone := subIssueMSU.io.IssueMSU_Excute_io.sigDone
 
 //debug
 printf(p"[ExcuteHandler] sigDone = ${io.sigDone}\n") 
@@ -44,6 +47,9 @@ printf(p"[ExcuteHandler] sigDone = ${io.sigDone}\n")
 
     /*  between Top and IssueMLU */
     io.FSM_MLU_io <> subIssueMLU.io.FSM_MLU_io
+
+    /*  between Top and IssueMSU */
+    io.FSM_MSU_io <> subIssueMSU.io.FSM_MSU_io
     
 
     /*  between ExcuteHandler and IssueMMAU */
@@ -52,8 +58,17 @@ printf(p"[ExcuteHandler] sigDone = ${io.sigDone}\n")
     /*  between ExcuteHandler and IssueMLU */
     subExcuteHandler.io.IssueMLU_Excute_io <> subIssueMLU.io.IssueMLU_Excute_io
 
+    /*  between ExcuteHandler and IssueMSU */
+    subExcuteHandler.io.IssueMSU_Excute_io <> subIssueMSU.io.IssueMSU_Excute_io
 
-    /*  between IssueMLU and IssueMMAU */
+
+    /*  between IssueMMAU and IssueMLU  */
+    //nothing
+
+    /*  between IssueMMAU and IssueMSU  */
+    //nothing
+
+    /*  between IssueMLU and IssueMSU  */
     //nothing
 
 
