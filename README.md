@@ -4,6 +4,14 @@ This is used to accelerate matrix operations.
 
 Branch "LS" is for adding LS instructions.
 
+**Currently supported LS instructions are as follows:**
+
+```
+mlae8
+mlbe8
+mlce32
+msce32
+```
 ## Quick start
 
 ```
@@ -38,3 +46,4 @@ make pythonGen PYTHON_NAME=xxx.py  #specific target
 ```
 make clean
 ```
+
