@@ -14,18 +14,11 @@ object Consts {
   val WORD_LEN      = 64
 
 
-  // val tileM         = 32
-  // val tileN         = 32
-  // val tileK         = 64
-
-  // val m             = 8   
-  // val n             = 8  
-  // val k             = 2
-  val tileM         = 64
+  val tileM         = 64  //RegFile尺寸，M维度
   val tileN         = 64
   val tileK         = 256
 
-  val m             = 32   
+  val m             = 32  //MMAU计算单元尺寸，M维度
   val n             = 32  
   val k             = 8
 
@@ -92,8 +85,6 @@ object Consts {
   val All_INDEX_LEN   = log2Ceil(setAll)
   val All_ADDR_LEN     = log2Ceil(numAcc + numTr) //表示所有寄存器标号所需位宽（0～7）
 
-
-
   // Load / Store
   val nRow_LEN = log2Ceil(16 + 1)   //这里后续还得调，先给个肯定够的
   val nCol_LEN = log2Ceil(4 + 1)
@@ -104,8 +95,6 @@ object Consts {
   val L2_ADDR_LEN = 48
   val L2_DATA_LEN = 64 * 8  //cacheline,64B
   val L2_ID_LEN = 5
-
-
 
   //ScoreBoard
   val RF_LEN = 8
