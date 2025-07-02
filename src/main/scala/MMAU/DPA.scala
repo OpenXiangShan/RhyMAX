@@ -5,7 +5,7 @@ import chisel3.util._
 
 import common._
 
-import fpu.core._
+// import fpu.core._
 
 // class DPA(k: Int) extends Module {
 //   val io = IO(new Bundle {
@@ -65,20 +65,20 @@ class DPA extends MMAUFormat {
 
 }
 
-class DPAFP8 extends Module {
-  val io = IO(new Bundle {
-    val vecA = Input(Vec(8, UInt(8.W)))
-    val vecB = Input(Vec(8, UInt(8.W)))
-    val muxCtrlSum = Input(Bool())
-    val eleC = Output(SInt(FixedPoint.SHIFTED_LENGTH.W))
-  })
+// class DPAFP8 extends Module {
+//   val io = IO(new Bundle {
+//     val vecA = Input(Vec(8, UInt(8.W)))
+//     val vecB = Input(Vec(8, UInt(8.W)))
+//     val muxCtrlSum = Input(Bool())
+//     val eleC = Output(SInt(FixedPoint.SHIFTED_LENGTH.W))
+//   })
 
-  val fpu = Module(new Fpu())
-  fpu.io.a := io.vecA
-  fpu.io.b := io.vecB
-  fpu.io.clear := io.muxCtrlSum
-  io.eleC := fpu.io.out
-}
+//   val fpu = Module(new Fpu())
+//   fpu.io.a := io.vecA
+//   fpu.io.b := io.vecB
+//   fpu.io.clear := io.muxCtrlSum
+//   io.eleC := fpu.io.out
+// }
 
 
 

@@ -73,11 +73,11 @@ object utility extends SbtModule with HasChisel {
   override def moduleDeps = super.moduleDeps ++ Seq(rocketchip)
 }
 
-// Definition for the FP8fpu submodule
-object fpu extends SbtModule with HasChisel {
-  override def millSourcePath = os.pwd / "FP8fpu"
-  override def moduleDeps = super.moduleDeps ++ Seq(rocketchip, utility)
-}
+//// Definition for the FP8fpu submodule
+//object fpu extends SbtModule with HasChisel {
+//  override def millSourcePath = os.pwd / "FP8fpu"
+//  override def moduleDeps = super.moduleDeps ++ Seq(rocketchip, utility)
+//}
 
 object AME extends SbtModule with HasChisel with millbuild.common.AMEModule with ScalaModule with ScalafmtModule {  m =>
   override def millSourcePath = millOuterCtx.millSourcePath
@@ -89,7 +89,7 @@ object AME extends SbtModule with HasChisel with millbuild.common.AMEModule with
 
   def rocketModule: ScalaModule = rocketchip
   def utilityModule: ScalaModule = utility
-  def fpuModule: ScalaModule = fpu
+  //def fpuModule: ScalaModule = fpu
 
   //override def scalacOptions = super.scalacOptions() ++ Agg("-deprecation", "-feature")
 
