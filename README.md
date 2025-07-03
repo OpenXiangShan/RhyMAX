@@ -30,7 +30,7 @@ mmacc.w.b
 
 可使用make命令 `make install_tools` 一键安装所有工具
 
-在配置开发环境过程中，可能需要访问github，建议使用全局vpn代理
+在配置开发环境过程中，可能需要访问github，建议使用vpn全局代理，并通过ssh密钥访问
 
 ## Quick start
 
