@@ -5,7 +5,7 @@ import chisel3.util._
 
 import common._
 
-import fpu.core._
+// import fpu.core._
 
 class PEcube extends MMAUFormat {
   val io = IO(new Bundle {
