@@ -34,7 +34,7 @@ class Expander extends Module{
     io.sigDone := subIssueMSU.io.IssueMSU_Excute_io.sigDone
 
 //debug
-printf(p"[ExcuteHandler] sigDone = ${io.sigDone}\n") 
+//printf(p"[ExcuteHandler] sigDone = ${io.sigDone}\n") 
 
     /*  between Top and ExcuteHandler */
     io.ScoreboardVisit_io <> subExcuteHandler.io.ScoreboardVisit_io

@@ -34,8 +34,8 @@ class TileHandler_MSU extends Module {
   }
 
 //debug
-printf(p"[TileHandler_MSU] io.is_msce32 = ${io.is_msce32} \n") 
-printf(p"[TileHandler_MSU] nRow = ${nRow} , nCol = ${nCol}  \n") 
+//printf(p"[TileHandler_MSU] io.is_msce32 = ${io.is_msce32} \n") 
+//printf(p"[TileHandler_MSU] nRow = ${nRow} , nCol = ${nCol}  \n") 
 
   io.TileHandler_MSU_io.nRow := nRow
   io.TileHandler_MSU_io.nCol := nCol
