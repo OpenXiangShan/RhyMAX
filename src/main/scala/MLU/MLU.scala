@@ -18,7 +18,7 @@ class MLU extends Module{
     })
 
     /*  read from L2 */
-    val readBuffer = Seq.fill(8)(Module(new SimpleHandshakeFIFO(depth = 10, width = Consts.L2_ADDR_LEN + Consts.L2_ID_LEN))) //L2读请求缓冲
+    val readBuffer = Seq.fill(8)(Module(new SimpleHandshakeFIFO(depth = 72, width = Consts.L2_ADDR_LEN + Consts.L2_ID_LEN))) //L2读请求缓冲
     for(y <- 0 until 8){//对每个Cacheline
         //写入FIFO
         readBuffer(y).io.enq_valid := io.FSM_MLU_io.Cacheline_Read_io(y).valid
