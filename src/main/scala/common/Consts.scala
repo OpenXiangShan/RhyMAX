@@ -86,8 +86,8 @@ object Consts {
   val All_ADDR_LEN     = log2Ceil(numAcc + numTr) //表示所有寄存器标号所需位宽（0～7）
 
   // Load / Store
-  val nRow_LEN = log2Ceil(16 + 1)   //这里后续还得调，先给个肯定够的
-  val nCol_LEN = log2Ceil(4 + 1)
+  val nRow_LEN = log2Ceil(512)   //这里后续还得调，先给个肯定够的
+  val nCol_LEN = log2Ceil(512)
   // val rs1_LEN = 16
   val rs1_LEN = 48
   val rs2_LEN = 16
