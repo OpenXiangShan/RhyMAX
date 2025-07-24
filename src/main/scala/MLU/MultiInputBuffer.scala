@@ -17,7 +17,7 @@ class MultiInputBuffer(val numWay: Int, val width: Int, val depth: Int) extends 
   })
 
   val buffer = Reg(Vec(depth, Vec(numWay, UInt(width.W))))
-  val valids = Reg(Vec(depth, Vec(numWay, Bool())))
+  val valids = RegInit(VecInit(Seq.fill(depth)(VecInit(Seq.fill(numWay)(false.B)))))
 
   val wptr = RegInit(0.U(log2Ceil(depth).W))
   val rptr = RegInit(0.U(log2Ceil(depth).W))
