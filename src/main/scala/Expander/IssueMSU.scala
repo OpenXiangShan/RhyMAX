@@ -38,10 +38,10 @@ class IssueMSU extends Module{
   }
 
 // debug
-printf(p"[IssueMSU] MSU_sigStart = ${io.IssueMSU_Excute_io.sigStart}, " +
-       p"mtilem=${io.IssueMSU_Excute_io.mtilem}, mtilen=${io.IssueMSU_Excute_io.mtilen}, " +
-       p"mtilek=${io.IssueMSU_Excute_io.mtilek}, rs1=${io.IssueMSU_Excute_io.rs1}, " +
-       p"rs2=${io.IssueMSU_Excute_io.rs2}, in_md=${io.IssueMSU_Excute_io.in_md}\n")
+//printf(p"[IssueMSU] MSU_sigStart = ${io.IssueMSU_Excute_io.sigStart}, " +
+//       p"mtilem=${io.IssueMSU_Excute_io.mtilem}, mtilen=${io.IssueMSU_Excute_io.mtilen}, " +
+//       p"mtilek=${io.IssueMSU_Excute_io.mtilek}, rs1=${io.IssueMSU_Excute_io.rs1}, " +
+//       p"rs2=${io.IssueMSU_Excute_io.rs2}, in_md=${io.IssueMSU_Excute_io.in_md}\n")
 
 
 // printf(p"[IssueMSU] MSU_sigStart = ${io.IssueMSU_Excute_io.sigStart}, " +

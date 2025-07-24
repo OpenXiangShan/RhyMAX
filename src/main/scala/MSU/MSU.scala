@@ -26,14 +26,14 @@ class MSU extends Module {
     io.RegFileAllRead_io.addr := io.FSM_MSU_io.md    //选择读取的寄存器
     io.RegFileAllRead_io.act := io.FSM_MSU_io.sigPortState // 由FSM控制
 
-    printf(p"[MSU] RFport = ${io.RegFileAllRead_io.act}\n")
-    printf(p"[MSU] RFaddr = ${io.RegFileAllRead_io.addr}\n")
+    //printf(p"[MSU] RFport = ${io.RegFileAllRead_io.act}\n")
+    //printf(p"[MSU] RFaddr = ${io.RegFileAllRead_io.addr}\n")
 
     when(io.FSM_MSU_io.is_storeC) {
         for(i <- 0 until Consts.numAccBank){//读RF
             io.RegFileAllRead_io.r(i).req.bits.setIdx := io.FSM_MSU_io.FSM_MSU_Output_io(0).index   //这里上面传来的两路index相同
             io.RegFileAllRead_io.r(i).req.valid := true.B
-            printf(p"[MSU] index = ${io.RegFileAllRead_io.r(i).req.bits.setIdx}\n")
+            //printf(p"[MSU] index = ${io.RegFileAllRead_io.r(i).req.bits.setIdx}\n")
         }
     }
 
@@ -57,8 +57,8 @@ class MSU extends Module {
         wireData(0) := Cat(RF_io.r(0).resp.data.head.asUInt , RF_io.r(1).resp.data.head.asUInt , RF_io.r(2).resp.data.head.asUInt , RF_io.r(3).resp.data.head.asUInt)
 
         // printf(p"[MSU] wireData(0) = ${wireData(0)}\n")
-        printf(p"[MSU] wireData(0) = 0x${Hexadecimal(wireData(0))}\n")
-        printf(p"[MSU] r(0) = 0x${Hexadecimal(RF_io.r(0).resp.data(0).asUInt)}\n")
+        //printf(p"[MSU] wireData(0) = 0x${Hexadecimal(wireData(0))}\n")
+        //printf(p"[MSU] r(0) = 0x${Hexadecimal(RF_io.r(0).resp.data(0).asUInt)}\n")
 
         //cacheline 1 
         regAddr(1) := io.FSM_MSU_io.FSM_MSU_Output_io(1).addr
