@@ -18,7 +18,7 @@ class MSU extends Module {
         val RegFileAllRead_io = Flipped(new RegFileAllRead_IO)  //读RF
     })
 
-    val writeBuffer = Seq.fill(2)(Module(new SimpleHandshakeFIFO(depth = 72, width = Consts.L2_ADDR_LEN + Consts.L2_DATA_LEN))) //L2写请求缓冲
+    val writeBuffer = Seq.fill(2)(Module(new SimpleHandshakeFIFO(depth = 144, width = Consts.L2_ADDR_LEN + Consts.L2_DATA_LEN))) //L2写请求缓冲
 
     /*  read from RF    */
     io.RegFileAllRead_io := DontCare    
