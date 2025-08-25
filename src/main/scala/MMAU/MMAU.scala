@@ -93,9 +93,12 @@ class MMAU extends MMAUFormat {
     io.addrReadB(i * 4 + 2) := subCTRL.io.addrReadB(i)
     io.addrReadB(i * 4 + 3) := subCTRL.io.addrReadB(i)
 
-    io.addrReadC(i) := subCTRL.io.addrReadC(i)
-    io.addrWriteC(i) := subCTRL.io.addrWriteC(i)
-    io.sigEnWriteC(i) := subCTRL.io.sigEnWriteC(i)
+    val j        = i / 4
+    val k        = i % 4
+    val target_c = 4 * j + 3 - k // 0, 1, 2, 3 -> 3, 2, 1, 0; 4, 5, 6, 7 -> 7, 6, 5, 4
+    io.addrReadC(target_c)   := subCTRL.io.addrReadC(i)
+    io.addrWriteC(target_c)  := subCTRL.io.addrWriteC(i)
+    io.sigEnWriteC(target_c) := subCTRL.io.sigEnWriteC(i)
   }
   
   /*    about actPort   */
