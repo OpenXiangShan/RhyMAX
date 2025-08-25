@@ -22,14 +22,17 @@ class RegFile extends RegFileFormat {
   /*    Tr Ports    */
   //read
   for (portIdx <- 0 until numTrReadPort) {
-  val port = io.readTr(portIdx)
+    val port = io.readTr(portIdx)
   
     for ((tr, trIdx) <- trs.zipWithIndex) {
       val hit = port.addr === trIdx.U
 
-      when(hit && port.act){
-        for (bankIdx <- 0 until numTrBank) {
-          port.r(bankIdx) <> tr.io.r(bankIdx)
+      for (bankIdx <- 0 until numTrBank) {
+        when(hit && port.act) {
+          port.r(bankIdx).req <> tr.io.r(bankIdx).req
+        }
+        when(RegNext(hit && port.act)) {
+          port.r(bankIdx).resp := tr.io.r(bankIdx).resp
         }
       }
     }
@@ -63,9 +66,12 @@ class RegFile extends RegFileFormat {
     for ((acc, accIdx) <- accs.zipWithIndex) {
       val hit = port.addr === accIdx.U
 
-      when(hit && port.act){
-        for (bankIdx <- 0 until numAccBank) {
+      for (bankIdx <- 0 until numAccBank) {
+        when(hit && port.act){
           port.r(bankIdx) <> acc.io.r(bankIdx)
+        }
+        when(RegNext(hit && port.act)) {
+          port.r(bankIdx).resp := acc.io.r(bankIdx).resp
         }
       }
     }
@@ -96,11 +102,13 @@ class RegFile extends RegFileFormat {
       for ((tr, trIdx) <- trs.zipWithIndex) {
       val hit = port.addr === trIdx.U
 
-      when(hit && port.act){
-        for (bankIdx <- 0 until numTrBank) {
+      for (bankIdx <- 0 until numTrBank) {
+        when(hit && port.act){
           tr.io.r(bankIdx).req.bits.setIdx := port.r(bankIdx).req.bits.setIdx(Tr_INDEX_LEN-1 , 0)
-          port.r(bankIdx).resp.data.head := tr.io.r(bankIdx).resp.data.head.asUInt.pad(All_LEN)
           tr.io.r(bankIdx).req.valid := port.r(bankIdx).req.valid
+        }
+        when(RegNext(hit && port.act)) {
+          port.r(bankIdx).resp := tr.io.r(bankIdx).resp
         }
       }
      }
@@ -110,11 +118,13 @@ class RegFile extends RegFileFormat {
       for ((acc, accIdx) <- accs.zipWithIndex) {
       val hit = (port.addr - 4.U) === accIdx.U
 
-      when(hit && port.act){
-        for (bankIdx <- 0 until numAccBank) {
+      for (bankIdx <- 0 until numAccBank) {
+        when(hit && port.act){
           acc.io.r(bankIdx).req.bits.setIdx := port.r(bankIdx).req.bits.setIdx(Acc_INDEX_LEN-1 , 0)
-          port.r(bankIdx).resp.data.head := acc.io.r(bankIdx).resp.data.head.asUInt.pad(All_LEN)
           acc.io.r(bankIdx).req.valid := port.r(bankIdx).req.valid
+        }
+        when(RegNext(hit && port.act)) {
+          port.r(bankIdx).resp := acc.io.r(bankIdx).resp
         }
       }
      }
