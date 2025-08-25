@@ -8,6 +8,8 @@ import Expander._
 import RegFile._
 import IssueQueen._
 
+import utility.GTimer
+
 
 
 class MLU extends Module{
@@ -38,6 +40,13 @@ class MLU extends Module{
     // val wireSplit = Wire(Vec(8, Vec(8, UInt(width.W))))  //接MultiInputMux，每个cacheline分8路(以Load AB为例)
     val wireSplit = WireInit(VecInit(Seq.fill(8)(VecInit(Seq.fill(8)(0.U(width.W))))))//接MultiInputMux，每个cacheline分8路(以Load AB为例)
     val subMultiInputBuffer = Seq.fill(8)(Module(new MultiInputBuffer(numWay = 8, width = 136 , depth = 32)))    //8个cacheline , 每个cacheline拆成8路，每路是8B的向量，外加一个5bit的id ,再加一个index的偏移量offset（0～7）(以Load AB为例)又因为需要和C复用,故选取较大的128+5
+
+    def log(name: String, s: Printable): Unit = {
+        if (!Consts.LOGGING) {
+            return;
+        }
+        printf(cf"[cycle ${GTimer()}][MLU][$name] " + s + cf"\n")
+    }
 
     io.RegFileAllWrite_io.addr := io.FSM_MLU_io.md    //选择写入的寄存器
     io.RegFileAllWrite_io.act := io.FSM_MLU_io.sigPortState // 由FSM控制
@@ -80,15 +89,25 @@ class MLU extends Module{
         }.elsewhen(io.FSM_MLU_io.is_loadC) {//每个MultiInputBuffer对应一个Bank
             for(i <- 0 until 4){//大端,即对bank0~bank3,bank0数据由cachline返回的数据的高位段获得
                 wireSplit(y)(3 - i) := Cat( y.U(3.W) , indata(i * 128 + 127 , i * 128) , id )  //原Cacheline编号 + split_data + id
+                when(valid) {
+                    log("loadC", cf"wireSplit($y)(${3 - i}) := " +
+                                         cf"{${y.U(3.W)}}, 0x${indata(i * 128 + 127, i * 128)}%x, ${id}}")
+                }
             }
 
             for(i <- 0 until 4){
                 if(y % 2 == 0){//cachline y为偶数
                     subMultiInputBuffer(i).io.in(y / 2) := wireSplit(y)(i)
                     subMultiInputBuffer(i).io.in_valid(y / 2) := valid
+                    when(valid) {
+                      log("loadC", cf"subMultiInputBuffer($i)(${y / 2}) := wireSplit($y)($i)")
+                    }
                 }else{
                     subMultiInputBuffer(i + 4).io.in(y / 2) := wireSplit(y)(i)
                     subMultiInputBuffer(i + 4).io.in_valid(y / 2) := valid
+                    when(valid) {
+                      log("loadC", cf"subMultiInputBuffer(${i + 4})(${y / 2}) := wireSplit($y)($i)")
+                    }
                 }
             }
 
@@ -151,6 +170,11 @@ class MLU extends Module{
 
 
 
+                when(readvalid) {
+                  log("loadAB", cf"bankId ${bankId}%d, index ${index}%d, offset ${offset}%d, " +
+                                cf"target_bank ${i * 8 + y}%d, target_index ${index + offset}%d, " +
+                                cf"data 0x${outdata}%x")
+                }
             }
 
             
@@ -184,6 +208,11 @@ class MLU extends Module{
             io.RegFileAllWrite_io.w(y).req.bits.setIdx := index 
             io.RegFileAllWrite_io.w(y).req.bits.data.head := outdata
             io.RegFileAllWrite_io.w(y).req.valid := readvalid
+            when(readvalid) {
+                log("loadC", cf"cachelineId ${cachelineID}%d, row ${row}%d, col ${col}%d, " +
+                             cf"target_bank ${y}%d, target_index ${index}%d, " +
+                             cf"data 0x${outdata}%x")
+            }
         
         }
 

@@ -71,6 +71,9 @@ class IssueMLU extends Module{
   /*    between Top and regInfo    */
   //done above
   io.IssueMLU_Excute_io.out_md := reg_md
+  io.IssueMLU_Excute_io.out_is_mlae8  := reg_is_mlae8
+  io.IssueMLU_Excute_io.out_is_mlbe8  := reg_is_mlbe8
+  io.IssueMLU_Excute_io.out_is_mlce32 := reg_is_mlce32
 
   /*    between Top and FSM    */
   subFSM.io.sigStart := io.IssueMLU_Excute_io.sigStart

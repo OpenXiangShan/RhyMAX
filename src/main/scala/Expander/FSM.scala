@@ -6,6 +6,7 @@ import chisel3.util._
 import common._
 import MMAU._
 
+import utility.GTimer
 
 
 
@@ -217,6 +218,17 @@ class FSM_MLU extends Module{ //MLU状态机
   }
 
 
+  def logRead(name: String, y: Int, read_io: Cacheline_Read_IO): Unit = {
+    if (!Consts.LOGGING) {
+      return;
+    }
+
+    when(read_io.valid) {
+      printf(cf"[cycle ${GTimer()}][MLU][$name] read_io($y): " +
+             cf"addr 0x${read_io.addr}%x, id ${read_io.id}, " +
+             cf"regRow $regRow, regCol $regCol, y $y\n")
+    }
+  }
 
 
   when(io.is_loadAB) {  //load A或load B类
@@ -224,6 +236,7 @@ class FSM_MLU extends Module{ //MLU状态机
     for(y <- 0 until 8){
       io.FSM_MLU_io.Cacheline_Read_io(y).addr := baseAddr + (regRow * 8.U + y.U) * stride + regCol * 64.U
       io.FSM_MLU_io.Cacheline_Read_io(y).id := Cat(regCol(1 , 0) , regRow(2 , 0))
+      logRead("loadAB", y, io.FSM_MLU_io.Cacheline_Read_io(y))
     }
     
   }.elsewhen(io.is_loadC) { //load C类
@@ -231,6 +244,7 @@ class FSM_MLU extends Module{ //MLU状态机
     for(y <- 0 until 8){
       io.FSM_MLU_io.Cacheline_Read_io(y).addr := baseAddr + (regRow * 4.U + (y / 2).U ) * stride + 128.U * regCol + (y % 2).U * 64.U
       io.FSM_MLU_io.Cacheline_Read_io(y).id := Cat(regCol(0) , regRow(3 , 0))
+      logRead("loadC", y, io.FSM_MLU_io.Cacheline_Read_io(y))
     }
 
   }
