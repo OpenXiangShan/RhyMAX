@@ -111,6 +111,19 @@ object Consts {
   val RF_LEN = 8
   val Unit_LEN = 5
 
+  /**
+    * LOGGING
+    *
+    * Set this constant to `true` to enable debug logging throughout the hardware modules.
+    * When enabled, various modules will print debug information (e.g., using `printf`) to the simulation output.
+    * Set to `false` (default) to disable all debug logging for better simulation performance.
+    *
+    * Usage:
+    *   if (!Consts.LOGGING) { return }
+    *   // or
+    *   when(Consts.LOGGING.B) { ... }
+    */
+  val LOGGING = false
 }
 
 class MMAUFormat extends Module{

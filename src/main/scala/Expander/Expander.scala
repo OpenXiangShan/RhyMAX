@@ -79,61 +79,80 @@ class Expander extends Module{
     /**
       * Logging
       */
+    val loggerMMAU = new UopLogger("MMAU", subIssueMMAU.io.IssueMMAU_Excute_io)
+    val loggerMLA = new UopLogger("MLA", subIssueMLU.io.IssueMLU_Excute_io)
+    val loggerMLB = new UopLogger("MLB", subIssueMLU.io.IssueMLU_Excute_io)
+    val loggerMLC = new UopLogger("MLC", subIssueMLU.io.IssueMLU_Excute_io)
+    val loggerMSU = new UopLogger("MSU", subIssueMSU.io.IssueMSU_Excute_io)
 
-    val timer = GTimer()
+    loggerMMAU.logStart(_.sigStart)
+    loggerMLA.logStart(b => b.sigStart && b.is_mlae8)
+    loggerMLB.logStart(b => b.sigStart && b.is_mlbe8)
+    loggerMLC.logStart(b => b.sigStart && b.is_mlce32)
+    loggerMSU.logStart(_.sigStart)
 
-    when (subIssueMMAU.io.IssueMMAU_Excute_io.sigStart) {
-      val in_ms1 = subIssueMMAU.io.IssueMMAU_Excute_io.in_ms1
-      val in_ms2 = subIssueMMAU.io.IssueMMAU_Excute_io.in_ms2
-      val in_md  = subIssueMMAU.io.IssueMMAU_Excute_io.in_md
-      val mtilem = subIssueMMAU.io.IssueMMAU_Excute_io.mtilem
-      val mtilen = subIssueMMAU.io.IssueMMAU_Excute_io.mtilen
-      val mtilek = subIssueMMAU.io.IssueMMAU_Excute_io.mtilek
+    loggerMMAU.logDone(_.sigDone)
+    loggerMLA.logDone(b => b.sigDone && b.out_is_mlae8)
+    loggerMLB.logDone(b => b.sigDone && b.out_is_mlbe8)
+    loggerMLC.logDone(b => b.sigDone && b.out_is_mlce32)
+    loggerMSU.logDone(_.sigDone)
+}
 
-      printf(p"[cycle=${timer}][MMAU] start: in_ms1=${in_ms1}, in_ms2=${in_ms2}, in_md=${in_md}, " +
-             p"mtilem=${mtilem}, mtilen=${mtilen}, mtilek=${mtilek}\n")
+
+class UopLogger[T <: Bundle](name: String, info: T) {
+  val startCount = RegInit(0.U(32.W))
+  val doneCount = RegInit(0.U(32.W))
+  val timer = GTimer()
+
+  val start_prefix = cf"[cycle=${timer}][${name}][$startCount] start: "
+  val done_prefix = cf"[cycle=${timer}][${name}][$doneCount] done: "
+
+  val info_start_cf = info match {
+    case info: IssueMMAU_Excute_IO =>
+      cf"in_ms1=${info.in_ms1}, in_ms2=${info.in_ms2}, in_md=${info.in_md}, " +
+      cf"mtilem=${info.mtilem}, mtilen=${info.mtilen}, mtilek=${info.mtilek}\n"
+    case info: IssueMLU_Excute_IO =>
+      cf"rs1=${info.rs1}, rs2=${info.rs2}, md=${info.in_md}, " +
+      cf"mtilem=${info.mtilem}, mtilen=${info.mtilen}, mtilek=${info.mtilek}\n"
+    case info: IssueMSU_Excute_IO =>
+      cf"rs1=${info.rs1}, rs2=${info.rs2}, md=${info.in_md}, " +
+      cf"mtilem=${info.mtilem}, mtilen=${info.mtilen}, mtilek=${info.mtilek}\n"
+    case _ =>
+      require(false, "UopLogger: unknown info type")
+      cf""
+  }
+
+  val info_done_cf = info match {
+    case info: IssueMMAU_Excute_IO =>
+      cf"out_ms1=${info.out_ms1}, out_ms2=${info.out_ms2}, out_md=${info.out_md}\n"
+    case info: IssueMLU_Excute_IO =>
+      cf"out_md=${info.out_md}\n"
+    case info: IssueMSU_Excute_IO =>
+      cf"\n"
+    case _ =>
+      require(false, "UopLogger: unknown info type")
+      cf""
+  }
+
+  def logStart(cond: (T => Bool)): Unit = {
+    if (!Consts.LOGGING) {
+      return;
     }
 
-    when (subIssueMLU.io.IssueMLU_Excute_io.sigStart) {
-      val is_mlbe8 = subIssueMLU.io.IssueMLU_Excute_io.is_mlbe8
-      val is_mlae8 = subIssueMLU.io.IssueMLU_Excute_io.is_mlae8
-      val is_mlce32 = subIssueMLU.io.IssueMLU_Excute_io.is_mlce32
-      val rs1 = subIssueMLU.io.IssueMLU_Excute_io.rs1
-      val rs2 = subIssueMLU.io.IssueMLU_Excute_io.rs2
-      val md = subIssueMLU.io.IssueMLU_Excute_io.in_md
-      val mtilem = subIssueMLU.io.IssueMLU_Excute_io.mtilem
-      val mtilen = subIssueMLU.io.IssueMLU_Excute_io.mtilen
-      val mtilek = subIssueMLU.io.IssueMLU_Excute_io.mtilek
+    when (cond(info)) {
+      startCount := startCount + 1.U
+      printf(start_prefix + info_start_cf)
+    }
+  }
 
-      printf(p"[cycle=${timer}][MLU] start: is_mlbe8=${is_mlbe8}, is_mlae8=${is_mlae8}, is_mlce32=${is_mlce32}, " +
-             p"rs1=${rs1}, rs2=${rs2}, md=${md}, mtilem=${mtilem}, mtilen=${mtilen}, mtilek=${mtilek}\n")
+  def logDone(cond: (T => Bool)): Unit = {
+    if (!Consts.LOGGING) {
+      return;
     }
 
-    when (subIssueMSU.io.IssueMSU_Excute_io.sigStart) {
-      val is_msce32 = subIssueMSU.io.IssueMSU_Excute_io.is_msce32
-      val rs1 = subIssueMSU.io.IssueMSU_Excute_io.rs1
-      val rs2 = subIssueMSU.io.IssueMSU_Excute_io.rs2
-      val md = subIssueMSU.io.IssueMSU_Excute_io.in_md
-      val mtilem = subIssueMSU.io.IssueMSU_Excute_io.mtilem
-      val mtilen = subIssueMSU.io.IssueMSU_Excute_io.mtilen
-      val mtilek = subIssueMSU.io.IssueMSU_Excute_io.mtilek
-
-      printf(p"[cycle=${timer}][MSU] start: is_msce32=${is_msce32}, rs1=${rs1}, rs2=${rs2}, md=${md}, " +
-             p"mtilem=${mtilem}, mtilen=${mtilen}, mtilek=${mtilek}\n")
+    when (cond(info)) {
+      doneCount := doneCount + 1.U
+      printf(done_prefix + info_done_cf)
     }
-
-    when (subIssueMMAU.io.IssueMMAU_Excute_io.sigDone) {
-      printf(p"[cycle=${timer}][MMAU] done"
-             + p" out_ms1=${subIssueMMAU.io.IssueMMAU_Excute_io.out_ms1},"
-             + p" out_ms2=${subIssueMMAU.io.IssueMMAU_Excute_io.out_ms2},"
-             + p" out_md=${subIssueMMAU.io.IssueMMAU_Excute_io.out_md}\n")
-    }
-
-    when (subIssueMLU.io.IssueMLU_Excute_io.sigDone) {
-      printf(p"[cycle=${timer}][MLU] done out_md=${subIssueMLU.io.IssueMLU_Excute_io.out_md}\n")
-    }
-
-    when (subIssueMSU.io.IssueMSU_Excute_io.sigDone) {
-      printf(p"[cycle=${timer}][MSU] done out_md=${subIssueMSU.io.IssueMSU_Excute_io.out_md}\n")
-    }
+  }
 }

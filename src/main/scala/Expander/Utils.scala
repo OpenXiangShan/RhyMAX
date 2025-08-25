@@ -204,6 +204,9 @@ class IssueMLU_Excute_IO extends Bundle{//连接ExcuteHandler
 
   val sigDone = Output(Bool())    //结束信号
   val out_md = Output(UInt(Consts.All_ADDR_LEN.W))  //结束时用于回收
+  val out_is_mlae8  = Output(Bool())
+  val out_is_mlbe8  = Output(Bool())
+  val out_is_mlce32 = Output(Bool())
 }
 
 
