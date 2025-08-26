@@ -13,9 +13,10 @@ class ExcuteHandler extends Module {
     val Uop_io = new Uop_IO
     val ScoreboardVisit_io = new ScoreboardVisit_IO
 
-    val IssueMMAU_Excute_io = Flipped(new IssueMMAU_Excute_IO)
-    val IssueMLU_Excute_io  = Flipped(new IssueMLU_Excute_IO)
-    val IssueMSU_Excute_io  = Flipped(new IssueMSU_Excute_IO)
+    val IssueMMAU_Excute_io     = Flipped(new IssueMMAU_Excute_IO)
+    val IssueMLU_Excute_io      = Flipped(new IssueMLU_Excute_IO)
+    val IssueMSU_Excute_io      = Flipped(new IssueMSU_Excute_IO)
+    val IssueMrelease_Excute_io = Flipped(new IssueMrelease_Excute_IO)
   })
 
   // ----------- 别名简化 -----------
@@ -33,6 +34,7 @@ class ExcuteHandler extends Module {
   val MMAU_Bit = 2
   val MISC_Bit = 3
   val EWU_Bit  = 4
+  val MRELEASE_Bit = 5
 
   // ----------- 默认值 -----------
   sb.writeMaskAlloc_RF   := 0.U
@@ -82,6 +84,14 @@ class ExcuteHandler extends Module {
   val is_MSU_ins = Wire(Bool()) //指令为Load指令
   is_MSU_ins := uop.InsType_io.is_msce32
 
+  // Mrelease's default value
+  io.IssueMrelease_Excute_io.sigStart := false.B
+  io.IssueMrelease_Excute_io.tokenRd := 0.U
+
+  // Check mrelease inst type
+  val is_MRELEASE_ins = Wire(Bool())
+  is_MRELEASE_ins := uop.InsType_io.is_mrelease
+
   // ----------- ready 信号仲裁 -----------
   val mma_ready = uop.InsType_io.is_mmacc && {
     val regFree = (sb.read_RF(ms1) | sb.read_RF(ms2) | sb.read_RF(md)) === 0.U
@@ -101,7 +111,13 @@ class ExcuteHandler extends Module {
     regFree && unitFree
   }
 
-  val is_ready = mma_ready || mlu_ready || msu_ready
+  // 添加mrelease指令的ready信号判断
+  val mrelease_ready = is_MRELEASE_ins && {
+    val unitFree = sb.read_Unit(MSU_Bit) | sb.read_Unit(MRELEASE_Bit) === 0.U
+    unitFree
+  }
+
+  val is_ready = mma_ready || mlu_ready || msu_ready || mrelease_ready
   val is_shaked = is_ready && uop.ShakeHands_io.valid
   uop.ShakeHands_io.ready := is_ready
 
@@ -115,9 +131,10 @@ class ExcuteHandler extends Module {
   val msu_FreeRF = WireDefault(0.U(Consts.RF_LEN.W))
   val msu_FreeUnit = WireDefault(0.U(Consts.Unit_LEN.W))
 
+  val mrelease_FreeUnit = WireDefault(0.U(Consts.Unit_LEN.W))
 
   sb.writeMaskFree_RF   := mma_FreeRF | mlu_FreeRF | msu_FreeRF
-  sb.writeMaskFree_Unit := mma_FreeUnit | mlu_FreeUnit | msu_FreeUnit
+  sb.writeMaskFree_Unit := mma_FreeUnit | mlu_FreeUnit | msu_FreeUnit | mrelease_FreeUnit
 
 
 
@@ -207,6 +224,20 @@ class ExcuteHandler extends Module {
       msu_FreeRF   := (1.U << io.IssueMSU_Excute_io.out_md)
       msu_FreeUnit := (1.U << MSU_Bit)
     }
+
+  // ----------- Mrelease逻辑 -----------
+  when (is_MRELEASE_ins) {
+    io.IssueMrelease_Excute_io.sigStart := is_shaked
+    io.IssueMrelease_Excute_io.tokenRd := rs1
+
+    when (is_shaked) {
+      sb.writeMaskAlloc_Unit := (1.U << MRELEASE_Bit)
+    }
+  }
+
+  when (io.IssueMrelease_Excute_io.sigDone) {
+    mrelease_FreeUnit := (1.U << MRELEASE_Bit)
+  }
 }
 
 

@@ -19,6 +19,8 @@ class Expander extends Module{
       val FSM_MLU_io = new FSM_MLU_IO
       val FSM_MSU_io = new FSM_MSU_IO
 
+      val toXSCore_io = Decoupled(new AmuRelease_IO)
+
       val sigDone = Output(Bool())    //for debug
     })
 
@@ -28,6 +30,7 @@ class Expander extends Module{
     val subIssueMMAU = Module(new IssueMMAU)
     val subIssueMLU = Module(new IssueMLU)
     val subIssueMSU = Module(new IssueMSU)
+    val subIssueMrelease = Module(new IssueMrelease)
 
     /*  for debug   */
     // io.sigDone := subIssueMMAU.io.IssueMMAU_Excute_io.sigDone
@@ -45,7 +48,6 @@ class Expander extends Module{
     /*  between Top and IssueMMAU */
     io.FSM_MMAU_io <> subIssueMMAU.io.FSM_MMAU_io
 
-
     /*  between Top and IssueMLU */
     io.FSM_MLU_io <> subIssueMLU.io.FSM_MLU_io
 
@@ -62,6 +64,12 @@ class Expander extends Module{
     /*  between ExcuteHandler and IssueMSU */
     subExcuteHandler.io.IssueMSU_Excute_io <> subIssueMSU.io.IssueMSU_Excute_io
 
+    /*  between ExcuteHandler and IssueMRelease */
+    subExcuteHandler.io.IssueMrelease_Excute_io <> subIssueMrelease.io.IssueMrelease_Excute_io
+
+    /*  between ExcuteHandler and XSCore */
+    subIssueMrelease.io.toXSCore_io <> io.toXSCore_io
+
 
     /*  between IssueMMAU and IssueMLU  */
     //nothing
@@ -72,9 +80,8 @@ class Expander extends Module{
     /*  between IssueMLU and IssueMSU  */
     //nothing
 
-
-
-
+    /*  between IssueMSU and IssueMRelease  */
+    //nothing
 
     /**
       * Logging
