@@ -22,7 +22,7 @@ class Operands_IO extends Bundle{//操作数信息
   val ms1 = Input(UInt(Consts.All_ADDR_LEN.W))
   val ms2 = Input(UInt(Consts.All_ADDR_LEN.W))
   val md = Input(UInt(Consts.All_ADDR_LEN.W))
-  val rs1 = Input(UInt(Consts.rs1_LEN.W)) //base addr
+  val rs1 = Input(UInt(Consts.rs1_LEN.W)) //base addr for mls, or tokenRd for mrelease
   val rs2 = Input(UInt(Consts.rs2_LEN.W)) //stride
 }
 
@@ -34,6 +34,8 @@ class InsType_IO extends Bundle{//指令类型
   val is_mlce32 = Input(Bool())      //load指令,32-bit Acc load(C)
 
   val is_msce32 = Input(Bool())      //store指令,32-bit Acc store(C)
+
+  val is_mrelease = Input(Bool())   //release指令
 }
 
 
