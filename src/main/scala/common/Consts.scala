@@ -64,6 +64,8 @@ object Consts {
   val numAccReadPort: Int = 3
   val numAccWritePort: Int = 3
 
+  val numTokenReg: Int = 8
+
   val Acc_INDEX_LEN   = log2Ceil(setAcc)
   val Acc_ADDR_LEN     = log2Ceil(numAcc) //表示Acc标号所需位宽（0～3）
 
@@ -85,6 +87,8 @@ object Consts {
   val All_INDEX_LEN   = log2Ceil(setAll)
   val All_ADDR_LEN     = log2Ceil(numAcc + numTr) //表示所有寄存器标号所需位宽（0～7）
 
+  val TOKENREG_LEN = log2Ceil(numTokenReg)
+
   // Load / Store
   val nRow_LEN = log2Ceil(512)   //这里后续还得调，先给个肯定够的
   val nCol_LEN = log2Ceil(512)
@@ -98,7 +102,7 @@ object Consts {
 
   //ScoreBoard
   val RF_LEN = 8
-  val Unit_LEN = 5
+  val Unit_LEN = 6
 
   /**
     * LOGGING

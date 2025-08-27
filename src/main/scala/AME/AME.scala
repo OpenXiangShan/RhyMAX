@@ -37,6 +37,8 @@ class AME extends Module {
 
 
     val sigDone = Output(Bool())    // for debug
+
+    val amuRelease_io = Decoupled(new AmuRelease_IO) // amuRelease from AME to XSCore
   })
 
   val subMMAU = Module(new MMAU)
@@ -148,6 +150,7 @@ class AME extends Module {
   /*  between ScoreBoard and MLU  */
   //nothing
 
+  io.amuRelease_io <> subExpander.io.toXSCore_io
 }
 
 

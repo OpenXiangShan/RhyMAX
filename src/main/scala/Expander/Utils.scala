@@ -39,6 +39,9 @@ class InsType_IO extends Bundle{//指令类型
 }
 
 
+class AmuRelease_IO extends Bundle{
+  val tokenRd = UInt(Consts.TOKENREG_LEN.W)
+}
 
 
 class mtileConfig_IO extends Bundle{
@@ -267,4 +270,13 @@ class IssueMSU_Excute_IO extends Bundle {
 
   val sigDone = Output(Bool())    //结束信号
   val out_md = Output(UInt(Consts.All_ADDR_LEN.W))  //结束时用于回收
+}
+
+/*    MRELEASE   */
+
+class IssueMrelease_Excute_IO extends Bundle {
+  val sigStart = Input(Bool())    //启动信号
+
+  val tokenRd = Input(UInt(Consts.TOKENREG_LEN.W))
+  val sigDone = Output(Bool())    //结束信号
 }
